@@ -1,0 +1,26 @@
+site_name: SudokuResolver Docs
+theme:
+  name: material
+  language: ja
+  features:
+    - content.code.copy
+
+markdown_extensions:
+  # 数式をインライン/ブロックで扱うための拡張
+  - pymdownx.arithmatex:
+      generic: true
+  # 便利拡張（任意）
+  - admonition
+  - toc:
+      permalink: true
+  - tables
+  - attr_list
+
+# KaTeX を読み込む（CDN）
+extra_javascript:
+  - javascripts/katex.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js
+
+extra_css:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css
