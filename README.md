@@ -29,35 +29,43 @@
 
 数独という一見単純な数的パズルは、数学的には有限領域
 <ruby>制約充足問題<rt>せいやくじゅうそくもんだい</rt></ruby>
-(Constraint Satisfaction Problem, CSP) の典型例として記述することができ、その厳密な数理定式化を通じて、パズルの領域を超えた学術的な意味を帯びることになる。一般に CSP は三つ組 `(V, D, C)` によって定義される。すなわち `V` は変数集合、`D` は各変数の取り得る領域 (domain)、`C` は制約集合である。数独の場合、変数集合は `9×9` の格子上のセルに対応し、
+(Constraint Satisfaction Problem, CSP) の典型例として記述することができ、その厳密な数理定式化を通じて、パズルの領域を超えた学術的な意味を帯びることになる。一般に CSP は三つ組 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}(V,D,C)"><img alt="(V,D,C)" src="https://latex.codecogs.com/svg.latex?(V,D,C)"></picture>
+によって定義される。すなわち 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}V"><img alt="V" src="https://latex.codecogs.com/svg.latex?V"></picture>
+は変数集合、
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}D"><img alt="D" src="https://latex.codecogs.com/svg.latex?D"></picture>
+は各変数の取り得る領域 (domain)、 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}C"><img alt="C" src="https://latex.codecogs.com/svg.latex?C"></picture>
+は制約集合である。数独の場合、変数集合は 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}9\times9"><img alt="9x9" src="https://latex.codecogs.com/svg.latex?9\times9"></picture>
+の格子上のセルに対応し、
 
-<!-- (Eq.1) V, D の定義 -->
-<p id="eq-vd"><strong>(1)</strong></p>
 <picture>
-  <!-- dark -->
   <source media="(prefers-color-scheme: dark)"
           srcset="https://latex.codecogs.com/svg.latex?\color{white}V=\{x_{r,c}\mid%20r,c\in\{1,\dots,9\}\},\qquad%20D=\{1,\dots,9\}">
-  <!-- light -->
   <img alt="V and D definitions"
        src="https://latex.codecogs.com/svg.latex?V=\{x_{r,c}\mid%20r,c\in\{1,\dots,9\}\},\qquad%20D=\{1,\dots,9\}">
 </picture>
-<!-- LaTeX source:
+<!-- LaTeX:
 $$ V = \{ x_{r,c} \mid r,c \in \{1,\dots,9\} \}, \qquad D = \{1,\dots,9\} $$
 -->
 
-と定義できる。各 `x_{r,c}` はセル `(r,c)` に置かれる数字を表す。制約集合 `C` は「各行・各列・各 `3×3` ブロックにおいて 1 から 9 の数字が重複しない」という三種類の **<ruby>all-different 制約<rt>オールディファレントせいやく</rt></ruby>** に集約され、形式的には次のように記述される。
+と定義できる。各 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}x_{r,c}"><img alt="x_{r,c}" src="https://latex.codecogs.com/svg.latex?x_{r,c}"></picture>
+はセル (r,c) に置かれる数字を表す。制約集合 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}C"><img alt="C" src="https://latex.codecogs.com/svg.latex?C"></picture>
+は「各行・各列・各 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}3\times3"><img alt="3x3" src="https://latex.codecogs.com/svg.latex?3\times3"></picture>
+ブロックにおいて 1 から 9 の数字が重複しない」という三種類の **<ruby>all-different 制約<rt>オールディファレントせいやく</rt></ruby>** に集約され、形式的には次のように記述される。
 
-<!-- (Eq.2) all-different constraints -->
-<p id="eq-alldiff"><strong>(2)</strong></p>
 <picture>
-  <!-- dark -->
   <source media="(prefers-color-scheme: dark)"
           srcset="https://latex.codecogs.com/svg.latex?\color{white}x_{r,c}\neq%20x_{r,c'}\quad(c\neq%20c'),\qquad%20x_{r,c}\neq%20x_{r',c}\quad(r\neq%20r'),\qquad%20x_{r,c}\neq%20x_{r',c'}\ \text{if}\ (r,c),(r',c')\in%20B">
-  <!-- light -->
-  <img alt="All-different constraints for rows, columns, and blocks"
+  <img alt="All-different constraints"
        src="https://latex.codecogs.com/svg.latex?x_{r,c}\neq%20x_{r,c'}\quad(c\neq%20c'),\qquad%20x_{r,c}\neq%20x_{r',c}\quad(r\neq%20r'),\qquad%20x_{r,c}\neq%20x_{r',c'}\ \text{if}\ (r,c),(r',c')\in%20B">
 </picture>
-<!-- LaTeX source:
+<!-- LaTeX:
 $$
 x_{r,c} \neq x_{r,c'} \quad (c \neq c'), \quad
 x_{r,c} \neq x_{r',c} \quad (r \neq r'), \quad
@@ -65,81 +73,61 @@ x_{r,c} \neq x_{r',c'} \quad \text{if } (r,c),(r',c') \in B
 $$
 -->
 
-ここで `B` は `3×3` ブロックのいずれかである。さらに問題文として与えられる与え値 (givens) は、特定セルに対する固定制約 `x_{r,c}=d` (`d ∈ {1,…,9}`) として追加される。したがって数独とは「与えられた初期制約を含む CSP を解く問題」であると定義できる。
+ここで 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}B"><img alt="B" src="https://latex.codecogs.com/svg.latex?B"></picture>
+は 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}3\times3"><img alt="3x3" src="https://latex.codecogs.com/svg.latex?3\times3"></picture>
+ブロックのいずれかである。さらに問題文として与えられる与え値 (givens) は、特定セルに対する固定制約 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}x_{r,c}=d,\;d\in\{1,\dots,9\}"><img alt="x= d, d in {1..9}" src="https://latex.codecogs.com/svg.latex?x_{r,c}=d,\;d\in\{1,\dots,9\}"></picture>
+として追加される。したがって数独とは「与えられた初期制約を含む CSP を解く問題」であると定義できる。
 
-この枠組みに基づけば、盤面 `P` が<ruby>充足可能<rt>じゅうそくかのう</rt></ruby> (satisfiable) であるとは、次の述語が真となることである。
+この枠組みに基づけば、盤面 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}P"><img alt="P" src="https://latex.codecogs.com/svg.latex?P"></picture>
+が<ruby>充足可能<rt>じゅうそくかのう</rt></ruby> (satisfiable) であるとは、次の述語が真となることである。
 
-<!-- (Eq.3) SAT(P) -->
-<p id="eq-sat"><strong>(3)</strong></p>
 <picture>
-  <!-- dark -->
   <source media="(prefers-color-scheme: dark)"
           srcset="https://latex.codecogs.com/svg.latex?\color{white}\mathsf{SAT}(P):=\exists\,\sigma:V\to\{1,\dots,9\}\ \text{s.t.}\ \sigma\ \text{satisfies%20all%20constraints}">
-  <!-- light -->
-  <img alt="SAT(P) definition"
+  <img alt="SAT(P)"
        src="https://latex.codecogs.com/svg.latex?\mathsf{SAT}(P):=\exists\,\sigma:V\to\{1,\dots,9\}\ \text{s.t.}\ \sigma\ \text{satisfies%20all%20constraints}">
 </picture>
-<!-- LaTeX source:
+<!-- LaTeX:
 $$ \mathsf{SAT}(P) := \exists\, \sigma: V \to \{1,\dots,9\} \ \text{s.t. } \sigma \text{ satisfies all constraints} $$
 -->
 
-すなわち全てのセルに数字を割り当てる写像 `σ` が存在し、かつその割り当てが制約集合 `C` をすべて満たすとき、盤面は解を持つ。一方で<ruby>一意性<rt>いちいせい</rt></ruby> (uniqueness) は次のように定義される。
+すなわち全てのセルに数字を割り当てる写像 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}\sigma"><img alt="sigma" src="https://latex.codecogs.com/svg.latex?\sigma"></picture>
+が存在し、かつその割り当てが制約集合 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}C"><img alt="C" src="https://latex.codecogs.com/svg.latex?C"></picture>
+をすべて満たすとき、盤面は解を持つ。一方で<ruby>一意性<rt>いちいせい</rt></ruby> (uniqueness) は次のように定義される。
 
-<!-- (Eq.4) U(P) -->
-<p id="eq-uniq"><strong>(4)</strong></p>
 <picture>
-  <!-- dark -->
   <source media="(prefers-color-scheme: dark)"
           srcset="https://latex.codecogs.com/svg.latex?\color{white}U(P):=\exists!\,\sigma:V\to\{1,\dots,9\}\ \text{s.t.}\ \sigma\ \text{satisfies%20all%20constraints}">
-  <!-- light -->
-  <img alt="Uniqueness definition U(P)"
+  <img alt="U(P)"
        src="https://latex.codecogs.com/svg.latex?U(P):=\exists!\,\sigma:V\to\{1,\dots,9\}\ \text{s.t.}\ \sigma\ \text{satisfies%20all%20constraints}">
 </picture>
-<!-- LaTeX source:
+<!-- LaTeX:
 $$ U(P) := \exists!\, \sigma: V \to \{1,\dots,9\} \ \text{s.t. } \sigma \text{ satisfies all constraints} $$
 -->
 
 すなわちただ一つの写像のみが制約を充足する場合、その盤面は「良問」と呼び得る。ここで重要なのは、一意性の確認は単なる SAT 判定よりも厳密な要請である点である。なぜなら「解が存在するか」に加えて「第二の解が存在しないこと」を示す必要があるからであり、これは実際のアルゴリズムにおいては「一解を発見した後に別解を探索し、その不在を確認する」という形で実装される。すなわち数独の一意性判定は「SAT 判定と UNSAT 判定を組み合わせた問題」と見なすことができ、理論的にも計算的にも非自明である。
 
-より一般化された `n^2 × n^2` 格子上の数独は、充足可能性判定が NP 完全であることが知られている（Yato–Seta, 2003）。探索空間は指数関数的に拡大し、 `9 × 9` の場合でも盤面全体の配置は
-
-<!-- (Eq.5) 9^81 ≈ 10^77 -->
-<p id="eq-space"><strong>(5)</strong></p>
-<picture>
-  <!-- dark -->
-  <source media="(prefers-color-scheme: dark)"
-          srcset="https://latex.codecogs.com/svg.latex?\color{white}9^{81}\approx10^{77}">
-  <!-- light -->
-  <img alt="Search space size 9^81 ≈ 10^77"
-       src="https://latex.codecogs.com/svg.latex?9^{81}\approx10^{77}">
-</picture>
-<!-- LaTeX source:
-$$ 9^{81} \approx 10^{77} $$
--->
-
-通りに及ぶ。さらに Felgenhauer–Jarvis (2006) によれば、完成盤は
-
-<!-- (Eq.6) 6.67 × 10^21 -->
-<p id="eq-count"><strong>(6)</strong></p>
-<picture>
-  <!-- dark -->
-  <source media="(prefers-color-scheme: dark)"
-          srcset="https://latex.codecogs.com/svg.latex?\color{white}6.67\times10^{21}">
-  <!-- light -->
-  <img alt="Number of completed grids 6.67e21"
-       src="https://latex.codecogs.com/svg.latex?6.67\times10^{21}">
-</picture>
-<!-- LaTeX source:
-$$ 6.67 \times 10^{21} $$
--->
-
+より一般化された 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}n^2\times%20n^2"><img alt="n^2 x n^2" src="https://latex.codecogs.com/svg.latex?n^2\times%20n^2"></picture>
+格子上の数独は、充足可能性判定が NP 完全であることが知られている（Yato–Seta, 2003）。探索空間は指数関数的に拡大し、 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}9\times9"><img alt="9x9" src="https://latex.codecogs.com/svg.latex?9\times9"></picture>
+の場合でも盤面全体の配置は 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}9^{81}\approx10^{77}"><img alt="9^81≈10^77" src="https://latex.codecogs.com/svg.latex?9^{81}\approx10^{77}"></picture>
+通りに及ぶ。さらに Felgenhauer–Jarvis (2006) によれば、完成盤は 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://latex.codecogs.com/svg.latex?\color{white}6.67\times10^{21}"><img alt="6.67e21" src="https://latex.codecogs.com/svg.latex?6.67\times10^{21}"></picture>
 通り存在し、その中から一意解を持つ良問を抽出することは決して自明ではない。この桁外れの数的基盤が、数独を NP 完全問題の一例としながらも、人間が現実的時間内に解けるという事実と強い対照をなしている。
 
 計算機科学の視点から見れば、数独は NP 完全問題の典型であるにもかかわらず、<ruby>制約伝播<rt>せいやくでんぱ</rt></ruby> や <ruby>ヒューリスティック探索<rt>ヒューリスティックたんさく</rt></ruby> を通じて現実的時間内に解ける場合が多い。この事実は「理論的困難さと実用的可解性の<ruby>乖離<rt>かいり</rt></ruby>」という計算理論上の重要な現象を具体的に示している。また心理学的・教育学的観点からは、数独が人間の推論能力や部分構造の認知に適合しているために世界的な普及を見せたと解釈できる。
 
 この点で数独は、単なる娯楽を超え、形式科学における<ruby>複雑性理論<rt>ふくざつせいりろん</rt></ruby>と、認知科学における<ruby>問題解決研究<rt>もんだいかいけつけんきゅう</rt></ruby>とをつなぐ実験場としての価値を持つ。形式的制約充足の枠組みを適用すれば、候補削減のメカニズムや矛盾検出のプロセスを数理的に追跡でき、そこから得られるヒューリスティクスは人工知能における探索戦略の研究に還元される。また生成側の視点においても、一意性検証を必須条件とすることで、パズル設計における「難易度」の概念を定量化できる。すなわち「構造」と「一意解性」は、理論的にも応用的にも相補的な役割を果たしており、アルゴリズム的美学と人間的可読性を架橋する基盤を提供する。
 
-結局のところ、数独を CSP として定式化することの意義は二重である。一方では、数理的・計算機科学的研究において制約充足と一意性判定という根本問題に具体的な検証場を与え、他方では、人間の推論様式に即した「難しくも解ける」課題の設計を可能にするという教育的・認知的価値をも付与する。ここにおいて数独は、計算複雑性理論と実用的可解性、論理構造と認知過程をつなぐ稀有な研究対象として位置づけられるのである。
+結局のところ、数独を CSP として定式化することの意義は二重である。一方では、数理的・計算機科学的研究において制約充足と一意性判定という根本問題に具体的な検証場を与え、他方では、人間の推論様式に即した「難しくも解ける」課題の設計を可能にするという教育的・認知的価値をも付与する。ここにおいて数独は、計算複雑性理論と実用的可解性、論理構造と認知過程をつなぐ稀有な研究対象として位置づけられるのである.
 
 
 
