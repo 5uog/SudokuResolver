@@ -1,14 +1,14 @@
 /* =========================================================
-   SudokuResolver — Modern UI Tokens & Topbar Styles
-   - Light/Dark テーマトークン
-   - モダンなトップバー（下影、下スクロールで隠れ/上スクロールで再表示）
-   - 既存 .container / .card / 見出し 等は互換維持＋微強化
-   - KaTeX や TOC も色味調整
+   SudokuResolver — Modern UI Tokens & Topbar Styles (rev3)
+   - Fix: latex画像の横スクロール解消（.tex-img / .math-* 追加）
+   - Fix: .para の強制折返し
    ========================================================= */
 
+/* ========== Tokens ========== */
 :root {
     color-scheme: light;
-    /* ---- Light theme tokens ---- */
+
+    /* Light */
     --bg: #ffffff;
     --fg: #0f1217;
     --muted: #5b6675;
@@ -20,14 +20,16 @@
     --brand: #0ea5e9;
     --brand-ink: #05364a;
 
-    --shadow: 0 8px 24px rgba(15, 18, 23, 0.06);
-    --shadow-strong: 0 12px 28px rgba(15, 18, 23, 0.12);
+    --shadow: 0 8px 24px rgba(15, 18, 23, .06);
+    --shadow-strong: 0 12px 28px rgba(15, 18, 23, .12);
+
+    --t: 160ms;
+    /* 色系トランジション短め */
 }
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
         color-scheme: dark;
-        /* ---- Dark (system) fallback tokens ---- */
         --bg: #0f1217;
         --fg: #eaeef2;
         --muted: #9aa4b2;
@@ -39,12 +41,11 @@
         --brand: #38bdf8;
         --brand-ink: #7dd3fc;
 
-        --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-        --shadow-strong: 0 12px 28px rgba(0, 0, 0, 0.5);
+        --shadow: 0 8px 24px rgba(0, 0, 0, .35);
+        --shadow-strong: 0 12px 28px rgba(0, 0, 0, .5);
     }
 }
 
-/* JS で <html data-theme="dark"> を付与する前提（手動切替を優先） */
 :root[data-theme="dark"] {
     color-scheme: dark;
     --bg: #0b0e13;
@@ -58,8 +59,8 @@
     --brand: #38bdf8;
     --brand-ink: #a5dbff;
 
-    --shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
-    --shadow-strong: 0 12px 28px rgba(0, 0, 0, 0.55);
+    --shadow: 0 8px 24px rgba(0, 0, 0, .38);
+    --shadow-strong: 0 12px 28px rgba(0, 0, 0, .55);
 }
 
 /* ========== Base ========== */
@@ -73,17 +74,20 @@ body {
     padding: 0;
     background: var(--bg);
     color: var(--fg);
+    /* “色だけ”遷移。all/影/フィルタは対象にしない */
+    transition:
+        background-color var(--t) ease,
+        color var(--t) ease;
+    /* 念のため：ページ全体の横スクロール抑止 */
+    overflow-x: clip;
+    /* 必要に応じて hidden */
 }
 
 body {
     font: 16px/1.7 system-ui, -apple-system, "Inter", "Segoe UI", "Yu Gothic UI", sans-serif;
-    background: var(--bg);
-    color: var(--fg);
     accent-color: var(--brand);
-    transition: background .25s ease, color .25s ease;
 }
 
-/* リンク */
 a {
     color: var(--link);
     text-decoration: none;
@@ -94,23 +98,29 @@ a:hover {
     text-decoration: underline;
 }
 
-/* レイアウト */
 .container {
     max-width: 920px;
     margin: 40px auto;
     padding: 0 20px 80px;
+    /* 背景/文字/枠だけ滑らかに */
+    transition:
+        background-color var(--t) ease,
+        color var(--t) ease,
+        border-color var(--t) ease;
 }
 
-/* カード */
 .card {
     background: var(--card);
     border-radius: 14px;
     padding: 24px;
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
+    transition:
+        background-color var(--t) ease,
+        color var(--t) ease,
+        border-color var(--t) ease;
 }
 
-/* 見出し */
 h1,
 h2,
 h3 {
@@ -131,7 +141,6 @@ h3 {
     color: var(--muted);
 }
 
-/* コード */
 code,
 pre {
     background: rgba(127, 127, 127, .12);
@@ -146,7 +155,6 @@ pre {
     background: color-mix(in oklab, var(--surface), transparent 0%);
 }
 
-/* TOC */
 .toc {
     margin: 12px 0 24px;
     font-size: .95rem;
@@ -161,18 +169,36 @@ pre {
     text-underline-offset: 2px;
 }
 
-/* テキストの補助色 */
 .muted {
     color: var(--muted);
 }
 
-/* KaTeX spacing */
+/* コンテンツ段落の強制折返し（長い式や英単語でのはみ出し防止） */
+.para {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* 画像・メディアのデフォルト: 親幅に収める（安全網） */
+img,
+picture,
+video,
+canvas,
+svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* KaTeX は親の色を継承して色遷移と同調 */
+.katex {
+    color: inherit;
+}
+
 .katex-display {
     margin: 1.1em 0;
 }
 
-/* ========== Topbar（新） ========== */
-/* 既存 .topbar を .sr-topbar と同義に（互換のため alias） */
+/* ========== Topbar ========== */
 .topbar,
 .sr-topbar {
     position: sticky;
@@ -184,24 +210,32 @@ pre {
     -webkit-backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--border);
     box-shadow: var(--shadow);
-    transition: transform .35s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease;
+    transition:
+        transform .30s ease,
+        /* 自身の移動のみ */
+        background-color var(--t) ease,
+        /* 色 */
+        border-color var(--t) ease;
+    /* 枠 */
     will-change: transform;
+    contain: paint;
+    /* 影響域を抑える（再描画を局所化） */
     z-index: 1000;
 }
 
-/* 下スクロールで隠し、上スクロールで再表示（JS が data-* を切替） */
+/* スクロール方向で表示/非表示 */
 .topbar[data-hidden],
 .sr-topbar[data-hidden] {
     transform: translateY(-100%);
 }
 
+/* ページ先頭を離れたらエレベーション付与 */
 .topbar[data-elevated],
 .sr-topbar[data-elevated] {
     box-shadow: var(--shadow-strong);
     background: color-mix(in oklab, var(--bg), #000 2%);
 }
 
-/* 中身のレイアウト（ブランド左、アクション右） */
 .sr-topbar__inner {
     max-width: 1200px;
     margin-inline: auto;
@@ -212,7 +246,6 @@ pre {
     padding: 12px clamp(16px, 4vw, 24px);
 }
 
-/* ブランド */
 .sr-brand {
     display: inline-flex;
     align-items: center;
@@ -228,18 +261,16 @@ pre {
     color: var(--fg);
 }
 
-/* アクション群 */
 .sr-actions {
     display: inline-flex;
     align-items: center;
     gap: 10px;
 }
 
-/* ボタン（汎用） */
+/* Buttons */
 .sr-btn {
     --btn-bg: transparent;
     --btn-ink: var(--fg);
-
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -250,7 +281,12 @@ pre {
     color: var(--btn-ink);
     cursor: pointer;
     user-select: none;
-    transition: background .2s ease, transform .08s ease, border-color .2s ease, color .2s ease, opacity .2s ease;
+    transition:
+        background-color 120ms ease,
+        color 120ms ease,
+        border-color 120ms ease,
+        transform 80ms ease;
+    /* 押下のみ */
 }
 
 .sr-btn:active {
@@ -262,12 +298,10 @@ pre {
     cursor: not-allowed;
 }
 
-/* ゴースト */
 .sr-btn--ghost:hover {
     background: color-mix(in oklab, var(--surface), transparent 30%);
 }
 
-/* プライマリ */
 .sr-btn--primary {
     --btn-bg: var(--brand);
     --btn-ink: #03131a;
@@ -282,7 +316,7 @@ pre {
     filter: brightness(0.98);
 }
 
-/* Sun/Moon アイコン切替（絵文字は使わない） */
+/* Sun/Moon icon swap */
 #theme-toggle .icon-sun {
     display: inline-block;
 }
@@ -299,7 +333,7 @@ pre {
     display: inline-block;
 }
 
-/* 既存の .topbar h1 / .topbar-actions 互換（残してもOK） */
+/* 互換（旧.topbar API） */
 .topbar h1 {
     margin: 0;
     font-size: 1.5rem;
@@ -312,4 +346,83 @@ pre {
     border-radius: 10px;
     background: transparent;
     cursor: pointer;
+}
+
+/* ========== 数式画像（LaTeX画像をレスポンシブ化） ========== */
+/* 既存 <img class="tex-img"> 用（デフォはインライン式） */
+.tex-img {
+    display: inline-block;
+    max-width: 100%;
+    width: auto;
+    /* アスペクト比維持 */
+    height: 1.2em;
+    /* 行中サイズ */
+    vertical-align: -0.2em;
+    /* ベースライン微調整 */
+    object-fit: contain;
+}
+
+/* ブロック表示したい場合は <img class="tex-img block"> を指定 */
+.tex-img.block {
+    display: block;
+    margin: 1rem auto;
+    height: auto;
+    max-width: min(100%, 720px);
+    width: auto;
+}
+
+/* .math-* コンテナを使う場合（picture/img どちらでもOK） */
+.math-block {
+    display: block;
+    margin: 1rem auto;
+    text-align: center;
+    /* センター寄せ */
+    max-width: 100%;
+}
+
+.math-block picture {
+    display: inline-block;
+    max-width: 100%;
+}
+
+.math-block img {
+    max-width: min(100%, 720px);
+    width: auto;
+    height: auto;
+}
+
+.math-inline {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: -0.2em;
+    /* 行中での上下位置微調整 */
+}
+
+.math-inline picture,
+.math-inline img {
+    display: inline-block;
+    max-width: 100%;
+    height: 1.1em;
+    /* 文字サイズに合わせて縮小 */
+    width: auto;
+    /* アスペクト比維持 */
+}
+
+/* ========== A11y: motion/contrast ========== */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+@media (prefers-contrast: more) {
+    :root {
+        --border: color-mix(in srgb, var(--border), #000 25%);
+        --link: color-mix(in srgb, var(--link), #000 15%);
+    }
 }
