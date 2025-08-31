@@ -1,19 +1,70 @@
+/* =========================================================
+   SudokuResolver — Modern UI Tokens & Topbar Styles
+   - Light/Dark テーマトークン
+   - モダンなトップバー（下影、下スクロールで隠れ/上スクロールで再表示）
+   - 既存 .container / .card / 見出し 等は互換維持＋微強化
+   - KaTeX や TOC も色味調整
+   ========================================================= */
+
 :root {
+    color-scheme: light;
+    /* ---- Light theme tokens ---- */
     --bg: #ffffff;
     --fg: #0f1217;
     --muted: #5b6675;
     --link: #0b5fff;
     --card: #f6f8fa;
+    --border: #e5e7eb;
+    --surface: #f2f4f7;
+
+    --brand: #0ea5e9;
+    --brand-ink: #05364a;
+
+    --shadow: 0 8px 24px rgba(15, 18, 23, 0.06);
+    --shadow-strong: 0 12px 28px rgba(15, 18, 23, 0.12);
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        /* ---- Dark (system) fallback tokens ---- */
         --bg: #0f1217;
         --fg: #eaeef2;
         --muted: #9aa4b2;
         --link: #77a4ff;
         --card: #1b1f27;
+        --border: #1f2630;
+        --surface: #131821;
+
+        --brand: #38bdf8;
+        --brand-ink: #7dd3fc;
+
+        --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        --shadow-strong: 0 12px 28px rgba(0, 0, 0, 0.5);
     }
+}
+
+/* JS で <html data-theme="dark"> を付与する前提（手動切替を優先） */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0b0e13;
+    --fg: #eaeef2;
+    --muted: #a6adb8;
+    --link: #8ab5ff;
+    --card: #141a24;
+    --border: #1f2630;
+    --surface: #0f141e;
+
+    --brand: #38bdf8;
+    --brand-ink: #a5dbff;
+
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+    --shadow-strong: 0 12px 28px rgba(0, 0, 0, 0.55);
+}
+
+/* ========== Base ========== */
+* {
+    box-sizing: border-box;
 }
 
 html,
@@ -25,30 +76,41 @@ body {
 }
 
 body {
-    font: 16px/1.7 system-ui, -apple-system, "Segoe UI", "Yu Gothic UI", sans-serif;
+    font: 16px/1.7 system-ui, -apple-system, "Inter", "Segoe UI", "Yu Gothic UI", sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    accent-color: var(--brand);
+    transition: background .25s ease, color .25s ease;
 }
 
+/* リンク */
 a {
     color: var(--link);
     text-decoration: none;
+    text-underline-offset: 2px;
 }
 
 a:hover {
     text-decoration: underline;
 }
 
+/* レイアウト */
 .container {
     max-width: 920px;
     margin: 40px auto;
     padding: 0 20px 80px;
 }
 
+/* カード */
 .card {
     background: var(--card);
     border-radius: 14px;
     padding: 24px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
 }
 
+/* 見出し */
 h1,
 h2,
 h3 {
@@ -69,6 +131,7 @@ h3 {
     color: var(--muted);
 }
 
+/* コード */
 code,
 pre {
     background: rgba(127, 127, 127, .12);
@@ -79,23 +142,16 @@ pre {
 pre {
     padding: 12px;
     overflow: auto;
+    border: 1px solid var(--border);
+    background: color-mix(in oklab, var(--surface), transparent 0%);
 }
 
+/* TOC */
 .toc {
     margin: 12px 0 24px;
     font-size: .95rem;
 }
 
-.muted {
-    color: var(--muted);
-}
-
-/* KaTeX inherits text color automatically */
-.katex-display {
-    margin: 1.1em 0;
-}
-
-/* ちょい使い勝手向上（任意） */
 .toc ul {
     margin: .4em 0 0;
     padding-left: 1.2em;
@@ -103,4 +159,157 @@ pre {
 
 .toc a {
     text-underline-offset: 2px;
+}
+
+/* テキストの補助色 */
+.muted {
+    color: var(--muted);
+}
+
+/* KaTeX spacing */
+.katex-display {
+    margin: 1.1em 0;
+}
+
+/* ========== Topbar（新） ========== */
+/* 既存 .topbar を .sr-topbar と同義に（互換のため alias） */
+.topbar,
+.sr-topbar {
+    position: sticky;
+    top: 0;
+    inset-inline: 0;
+    display: block;
+    background: color-mix(in oklab, var(--bg), transparent 0%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: transform .35s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease;
+    will-change: transform;
+    z-index: 1000;
+}
+
+/* 下スクロールで隠し、上スクロールで再表示（JS が data-* を切替） */
+.topbar[data-hidden],
+.sr-topbar[data-hidden] {
+    transform: translateY(-100%);
+}
+
+.topbar[data-elevated],
+.sr-topbar[data-elevated] {
+    box-shadow: var(--shadow-strong);
+    background: color-mix(in oklab, var(--bg), #000 2%);
+}
+
+/* 中身のレイアウト（ブランド左、アクション右） */
+.sr-topbar__inner {
+    max-width: 1200px;
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px clamp(16px, 4vw, 24px);
+}
+
+/* ブランド */
+.sr-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.sr-brand__title {
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: .2px;
+    font-size: clamp(18px, 2.3vw, 22px);
+    color: var(--fg);
+}
+
+/* アクション群 */
+.sr-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ボタン（汎用） */
+.sr-btn {
+    --btn-bg: transparent;
+    --btn-ink: var(--fg);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--btn-bg);
+    color: var(--btn-ink);
+    cursor: pointer;
+    user-select: none;
+    transition: background .2s ease, transform .08s ease, border-color .2s ease, color .2s ease, opacity .2s ease;
+}
+
+.sr-btn:active {
+    transform: translateY(1px);
+}
+
+.sr-btn[disabled] {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+/* ゴースト */
+.sr-btn--ghost:hover {
+    background: color-mix(in oklab, var(--surface), transparent 30%);
+}
+
+/* プライマリ */
+.sr-btn--primary {
+    --btn-bg: var(--brand);
+    --btn-ink: #03131a;
+    border-color: color-mix(in srgb, var(--brand), #000 12%);
+}
+
+:root[data-theme="dark"] .sr-btn--primary {
+    --btn-ink: #061014;
+}
+
+.sr-btn--primary:hover {
+    filter: brightness(0.98);
+}
+
+/* Sun/Moon アイコン切替（絵文字は使わない） */
+#theme-toggle .icon-sun {
+    display: inline-block;
+}
+
+#theme-toggle .icon-moon {
+    display: none;
+}
+
+:root[data-theme="dark"] #theme-toggle .icon-sun {
+    display: none;
+}
+
+:root[data-theme="dark"] #theme-toggle .icon-moon {
+    display: inline-block;
+}
+
+/* 既存の .topbar h1 / .topbar-actions 互換（残してもOK） */
+.topbar h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.topbar .topbar-actions button {
+    margin-left: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
 }
