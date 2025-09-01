@@ -1,30 +1,93 @@
 /* ================================================
-   Print Stylesheet — SudokuResolver
+   Print Stylesheet — SudokuResolver (enhanced)
    ================================================ */
 
-/* ページ余白 */
+/* 余白 */
 @page {
     margin: 20mm;
 }
 
-/* 全体の基本色を白黒に */
+/* 印刷全体の基調 */
+html,
 body {
     background: #fff !important;
     color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+body {
     font-size: 11pt;
     line-height: 1.5;
 }
 
-/* カードやコンテナをシンプルに */
+/* カードやコンテナはフラットに */
 .card,
 .container {
     background: #fff !important;
     border: 1px solid #ddd !important;
     box-shadow: none !important;
     padding: 1em;
+    break-inside: avoid;
 }
 
-/* リンクは下線＋URL を併記 */
+/* 見出し */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #000 !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+/* ナビやフッターなど印刷不要要素 */
+.topbar,
+.sr-topbar,
+nav,
+footer,
+.sr-actions {
+    display: none !important;
+}
+
+/* 画像/数式の扱い */
+img,
+svg {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+/* LaTeX（SVG）などのセンタリング */
+picture,
+img.latex,
+figure.eq {
+    display: block;
+    margin: 1em auto;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+/* 改ページ制御（章・節の先頭で改ページ） */
+.section,
+.chapter {
+    page-break-before: always;
+}
+
+/* コード・表・図の分割防止 */
+pre,
+code,
+table,
+figure {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+/* リンク：既定は URL 併記。JS で body[data-print-urls="off"] を付けると非表示に。 */
 a {
     color: #000 !important;
     text-decoration: underline;
@@ -35,41 +98,30 @@ a::after {
     font-size: 90%;
 }
 
-/* 見出しを黒強調 */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    color: #000 !important;
-    page-break-after: avoid;
-    page-break-inside: avoid;
+body[data-print-urls="off"] a::after {
+    content: "";
 }
 
-/* ナビゲーションやフッター等は印刷不要 */
-.topbar,
-nav,
-footer {
-    display: none !important;
-}
-
-/* 画像を縮小しすぎない */
-img,
-svg {
-    max-width: 100% !important;
-    height: auto !important;
-}
-
-/* 数式 (LaTeX SVG) を中央寄せ */
-picture,
-img.latex {
-    display: block;
-    margin: 1em auto;
-}
-
-/* 改ページ制御 */
-.section,
-.chapter {
-    page-break-before: always;
+/* ===== 単発の中央透かし（折返し＆可変サイズ） ===== */
+@media print {
+    body::before {
+        content: attr(data-wm);
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: rotate(-30deg);
+        transform-origin: center;
+        font-size: clamp(36pt, 10vw, 90pt);
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-align: center;
+        line-height: 1.1;
+        padding: 12mm;
+        white-space: normal;
+        color: rgba(0, 0, 0, .12);
+        z-index: 999999;
+        pointer-events: none;
+    }
 }
