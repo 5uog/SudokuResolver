@@ -256,6 +256,32 @@ h6,
     padding: 12px clamp(16px, 4vw, 24px);
 }
 
+/* ==== Brand link: 下線を出さない（hover/active時も） ==== */
+.sr-topbar .sr-brand,
+.sr-topbar .sr-brand:link,
+.sr-topbar .sr-brand:visited {
+    text-decoration: none;
+}
+
+.sr-topbar .sr-brand:hover,
+.sr-topbar .sr-brand:active {
+    text-decoration: none;
+}
+
+/* タイトルテキスト側にも保険をかける */
+.sr-topbar .sr-brand__title {
+    text-decoration: none;
+    border-bottom: 0;
+}
+
+/* キーボード操作の可視フォーカスは残す（下線なし） */
+.sr-topbar .sr-brand:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 3px;
+    text-decoration: none;
+    border-radius: 8px; /* 角丸で見やすく */
+}
+
 .sr-brand {
     display: inline-flex;
     align-items: center;
@@ -362,15 +388,26 @@ h6,
     color: inherit;
 }
 
-/* --- 数式ブロック：縦スクロールバー抑止 + 折返し強制 --- */
+.katex .mop,
+.katex .op-symbol { 
+    font-size: 1.05em;
+    line-height: 1.1;
+}
+
+/* --- 数式ブロック：縦スクロール完全抑止 + スクロール連鎖の遮断 --- */
 .katex-display,
 figure.eq {
-    overflow-x: hidden;
-    overflow-y: visible;
+    /* 幅関連（既存） */
     max-width: 100%;
     white-space: normal !important;
     word-break: break-word;
     line-break: anywhere;
+
+    /* スクロール制御 */
+    overflow-x: hidden;
+    overflow-y: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: auto;
     scrollbar-width: none;
 }
 
@@ -385,17 +422,18 @@ figure.eq::-webkit-scrollbar {
     margin: 1.1em 0;
 }
 
-/* KaTeXボックスを親幅内に収める */
-.katex-display>.katex {
+
+.katex-display>.katex,
+figure.eq .katex-display > .katex {
     display: inline-block;
     max-inline-size: 100%;
     white-space: normal !important;
+    contain: layout paint;
 }
 
 figure.eq {
     margin: 1.2em auto;
     text-align: center;
-    max-inline-size: 100%;
     padding-inline: 4px;
 }
 
@@ -510,6 +548,6 @@ figure.eq .katex-display>.katex {
 /* ===== 小画面で長式の視認性を少し上げる（任意） ===== */
 @media (max-width: 640px) {
     .katex-display {
-        font-size: 0.95em;
+        font-size: 1.12em;
     }
 }
