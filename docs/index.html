@@ -271,13 +271,24 @@
                 <p>
                     　計算複雑性の観点では、一般化された $n^2\times n^2$ 数独の充足可能性が NP 完全であることは標準的な結果であり、CNF SAT もしくはグラフ彩色からの多項式時間帰着によって示される。
                     CNF への符号化では、命題変数 $X_{r,c,d}$ を「セル $(r,c)$ に値 $d$ を置く」ことに対応させると、変数は $9\cdot 9\cdot 9=729$ 個となる。
-                    各セルちょうど一つの値という制約は $\bigvee_d X_{r,c,d}\quad\text{AND}\quad \bigwedge_{d\neq d'} (\neg X_{r,c,d}\vee \neg X_{r,c,d'})$ により与えられ、行・列・ブロックごとの all-different は値ごとに 
+                    各セルちょうど一つの値という制約は 
                     
                     $$
                     \displaystyle
-                    \bigwedge_{r}\ \bigwedge_{c\neq c'}(\neg X_{r,c,d}\vee \neg X_{r,c',d}),\quad \\
-                    \bigwedge_{c}\ \bigwedge_{r\neq r'}(\neg X_{r,c,d}\vee \neg X_{r',c,d}),\quad \\
-                    \bigwedge_{B}\ \bigwedge_{(r,c)\neq (r',c')\in B}(\neg X_{r,c,d}\vee \neg X_{r',c',d})
+                    \bigvee_{d=1}^{9} X_{r,c,d}
+                    \;\land\;
+                    \bigwedge_{\substack{d,d'\in[9]\\ d\neq d'}}\!\bigl(\neg X_{r,c,d}\vee \neg X_{r,c,d'}\bigr)
+                    $$ 
+
+                    により与えられ、行・列・ブロックごとの all-different は値ごとに 
+
+                    $$
+                    \displaystyle
+                    \begin{aligned}
+                    &\bigwedge_{r\in[9]}\ \bigwedge_{\substack{c,c'\in[9]\\ c\neq c'}}\!\bigl(\neg X_{r,c,d}\vee \neg X_{r,c',d}\bigr),\\
+                    &\bigwedge_{c\in[9]}\ \bigwedge_{\substack{r,r'\in[9]\\ r\neq r'}}\!\bigl(\neg X_{r,c,d}\vee \neg X_{r',c,d}\bigr),\\
+                    &\bigwedge_{B}\ \bigwedge_{\substack{(r,c),(r',c')\in B\\ (r,c)\neq (r',c')}}\!\bigl(\neg X_{r,c,d}\vee \neg X_{r',c',d}\bigr).
+                    \end{aligned}
                     $$
 
                     で与えられる。節数の増加は定数倍を含めても $O(9^3)$ の範囲に収まり、標準盤面でも数万節程度に過ぎない。

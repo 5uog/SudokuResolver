@@ -545,59 +545,64 @@ figure.eq .katex-display>.katex {
     }
 }
 
-/* ====== KaTeX: モバイルで“小さく見えがちな記号”だけ底上げ ====== */
+/* ====== KaTeX: モバイルで“小さく見えがちな記号”を強化 ====== */
 @media (max-width: 640px) {
 
-    /* 1) 大型演算子（∑ ∏ ∫ など）を少しだけ大きく */
+    /* 1) 大型演算子（∑ ∏ ⨆ ∨ ∧ ∫ など） */
     .katex .op-symbol {
-        font-size: 1.14em;
+        font-size: 1.20em;
+        line-height: 1.1;
+    }
+
+    .katex .op-symbol.large-op,
+    .katex-display .op-symbol {
+        font-size: 1.34em !important;
         line-height: 1.1;
     }
 
     .katex .op-limits>.vlist-t,
     .katex .op-limits>.vlist-r {
-        line-height: 1.15;
+        line-height: 1.22;
     }
 
-    /* 2) 大型の括弧・絶対値・ノルムの縦サイズ（伸長デリミタ）を強化 */
+    /* 2) 伸長デリミタ（(), [], {}, |, ‖ などの大きい括弧） */
     .katex .delimsizing.size1,
     .katex .delimsizing.size2,
     .katex .delimsizing.size3,
     .katex .delimsizing.size4 {
-        font-size: 1.10em;
+        font-size: 1.16em;
+        line-height: 1.05;
     }
 
-    /* 3) ルート記号（√）の縦の“釣り合い”を微調整 */
+    /* 3) ルート記号（√）の見映えをさらに強化 */
     .katex .sqrt .sqrt-sign {
-        transform: scaleY(1.06);
+        transform: scaleY(1.10);
         transform-origin: left bottom;
     }
 
-    /* 4) 上下付き（^ _）が小さすぎるのを緩和：script スタイルを少し大きく */
+    /* 4) 上下付き（^ / _）の可読性向上：script スタイルを増量 */
     .katex .scriptstyle {
-        font-size: 0.92em;
+        font-size: 0.98em;
     }
 
-    /* 既定より +2〜4% 程度 */
     .katex .scriptscriptstyle {
-        font-size: 0.84em;
+        font-size: 0.90em;
     }
 
-    /* 5) 分数の視認性：線をやや太く、上下の詰まりをほんの少し緩める */
+    /* 5) 分数：線を太くし、上下の詰まりをさらに緩和 */
     .katex .mfrac .frac-line {
-        border-top-width: 1.6px;
+        border-top-width: 1.8px;
     }
 
     .katex .mfrac .numerator,
     .katex .mfrac .denominator {
-        line-height: 1.2;
+        line-height: 1.22;
     }
 
-    /* 6) 積分記号と微小スペースのバランス（演算子の見映え微調整） */
-    .katex .mrel,
-    .katex .mbin {
-        font-size: 1.06em;
+    /* 6) 二項演算子/関係子（=, +, −, ≤, ≥, ≡ など）をわずかに増量 */
+    .katex .mbin,
+    .katex .mrel {
+        font-size: 1.10em;
+        line-height: 1.05;
     }
-
-    /* =, +, − などをわずかに */
 }
