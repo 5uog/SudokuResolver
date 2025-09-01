@@ -367,7 +367,11 @@
 
                     により、群作用の下での同型類の数が「固定される盤面の個数」の平均として評価できる。
                     実務的には、生成段階で代表元規約（例えば辞書式最小の行列形）を課すことで、探索木における同型分枝を未然に抑圧することが有効である。
+                </p>
+            </div>
 
+            <div class="para">
+                <p>
                     　難易度の定量化に関しては、単なる手数や分岐回数を超えて、縮約過程と探索過程の双方を統合する汎関数として定義するのが自然である。
                     情報理論的観点からは、時間を離散化して $t=0,1,\dots,T-1$ としたとき、
 
@@ -380,11 +384,14 @@
                     と表せる。
                     ここで $-\Delta H_t$ は時刻 $t$ における情報量減少（候補集合の対数サイズの減少）を表し、$B$ は探索分岐の集合、$\mathrm{depth}(b)$ は分岐 $b$ の深さである。
                     定数 $\lambda,\mu>0$ は単位系を整えるための重みであり、推論が停滞する局面では探索コストが支配的に、推論が強力に働く局面では $-\Delta H_t$ が支配的となる。
-
+                </p>
+            </div>
+            
+            <div class="para">
+                <p>
                     　経験的観察によれば、$-\Delta H_t$ の寄与はしばしばサブモジュラ関数に類似した漸減性を示す。
                     すなわち、手筋の追加適用による限界効用は逓減する傾向があり、この性質はサブモジュラ最適化における貪欲法の近似保証とアナロジーを持つ。
                     従って、候補削減規則を貪欲的に適用する戦略が実際に高品質の近似解法を与えるという経験則には、理論的根拠が付与される。
-
                 </p>
             </div>
 
@@ -804,44 +811,8 @@
             <p class="muted">© SudokuResolver Docs</p>
     </div>
 
-    <!-- JS は分離ファイルとして読み込み（ESM） -->
+    <script src="js/actions.js"></script>
     <script type="module" src="js/topbar.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- 章の自動ラップ: <h2 id=...> ～ 次の <h2> の直前までを <section.chapter> に包む ---
-            const container = document.querySelector('.container') || document.body;
-            const headings = Array.from(container.querySelectorAll('h2[id]'));
-
-            for (let i = 0; i < headings.length; i++) {
-                const h = headings[i];
-                // 既に章内ならスキップ
-                if (h.closest('section.chapter')) continue;
-
-                const sec = document.createElement('section');
-                sec.className = 'chapter';
-                // 章ごとに推定高さ（印刷を除き崩れ防止）。適宜調整可。
-                sec.style.containIntrinsicSize = '800px';
-
-                // h 自身から次の h2 の直前までを移動
-                let n = h;
-                const stop = headings[i + 1] || null;
-                h.before(sec);
-                while (n && n !== stop) {
-                    const next = n.nextSibling;
-                    sec.appendChild(n);
-                    n = next;
-                }
-            }
-
-            // --- 画像の遅延・非同期化を一括付与 ---
-            document.querySelectorAll('img').forEach(img => {
-                img.loading ??= 'lazy';
-                img.decoding ??= 'async';
-                img.fetchPriority ??= 'low';
-            });
-        });
-    </script>
 </body>
 
 </html>
