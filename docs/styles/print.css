@@ -1,13 +1,11 @@
 /* ================================================
-   Print Stylesheet — SudokuResolver (enhanced)
+   Print Stylesheet — SudokuResolver (enhanced+)
    ================================================ */
 
-/* 余白 */
 @page {
     margin: 20mm;
 }
 
-/* 印刷全体の基調 */
 html,
 body {
     background: #fff !important;
@@ -21,7 +19,6 @@ body {
     line-height: 1.5;
 }
 
-/* カードやコンテナはフラットに */
 .card,
 .container {
     background: #fff !important;
@@ -31,7 +28,6 @@ body {
     break-inside: avoid;
 }
 
-/* 見出し */
 h1,
 h2,
 h3,
@@ -44,7 +40,6 @@ h6 {
     break-inside: avoid;
 }
 
-/* ナビやフッターなど印刷不要要素 */
 .topbar,
 .sr-topbar,
 nav,
@@ -53,7 +48,6 @@ footer,
     display: none !important;
 }
 
-/* 画像/数式の扱い */
 img,
 svg {
     max-width: 100% !important;
@@ -62,7 +56,6 @@ svg {
     break-inside: avoid;
 }
 
-/* LaTeX（SVG）などのセンタリング */
 picture,
 img.latex,
 figure.eq {
@@ -72,13 +65,24 @@ figure.eq {
     break-inside: avoid;
 }
 
-/* 改ページ制御（章・節の先頭で改ページ） */
 .section,
 .chapter {
     page-break-before: always;
 }
 
-/* コード・表・図の分割防止 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    display: table-header-group;
+}
+
+tfoot {
+    display: table-footer-group;
+}
+
 pre,
 code,
 table,
@@ -87,7 +91,17 @@ figure {
     break-inside: avoid;
 }
 
-/* リンク：既定は URL 併記。JS で body[data-print-urls="off"] を付けると非表示に。 */
+pre,
+code {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+ul,
+ol {
+    break-inside: avoid;
+}
+
 a {
     color: #000 !important;
     text-decoration: underline;
@@ -96,32 +110,97 @@ a {
 a::after {
     content: " (" attr(href) ")";
     font-size: 90%;
+    word-break: break-all;
+}
+
+a[href^="#"]::after,
+a[href^="tel:"]::after,
+a[href^="mailto:"]::after {
+    content: "";
 }
 
 body[data-print-urls="off"] a::after {
     content: "";
 }
 
-/* ===== 単発の中央透かし（折返し＆可変サイズ） ===== */
+/* ========== ウォーターマーク ========== */
 @media print {
+
+    html {
+        background-image: var(--sr-wm-url);
+        background-repeat: repeat;
+        background-size: var(--sr-wm-tile-w, 280px) var(--sr-wm-tile-h, 280px);
+    }
+
     body::before {
         content: attr(data-wm);
+        display: block;
         position: fixed;
         inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
+
         transform: rotate(-30deg);
         transform-origin: center;
-        font-size: clamp(36pt, 10vw, 90pt);
+        font-size: clamp(36pt, 10vw, 96pt);
         font-weight: 800;
         letter-spacing: .06em;
         text-align: center;
         line-height: 1.1;
         padding: 12mm;
         white-space: normal;
+
         color: rgba(0, 0, 0, .12);
+        -webkit-text-stroke: 0.6pt rgba(255, 255, 255, .18);
+        text-shadow:
+            0 0 0.8pt rgba(255, 255, 255, .12),
+            0 0 1.2pt rgba(255, 255, 255, .08);
+
         z-index: 999999;
         pointer-events: none;
+        mix-blend-mode: multiply;
+    }
+
+    body[data-wm2]::before,
+    body[data-wm2]::after {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-30deg);
+        transform-origin: center;
+        font-size: clamp(36pt, 10vw, 96pt);
+        font-weight: 800;
+        letter-spacing: .06em;
+        line-height: 1.1;
+        white-space: nowrap;
+        color: rgba(0, 0, 0, .12);
+        -webkit-text-stroke: 0.6pt rgba(255, 255, 255, .18);
+        text-shadow:
+            0 0 0.8pt rgba(255, 255, 255, .12),
+            0 0 1.2pt rgba(255, 255, 255, .08);
+        z-index: 999999;
+        pointer-events: none;
+        mix-blend-mode: multiply;
+    }
+
+    body[data-wm2]::before {
+        content: attr(data-wm);
+        margin-right: calc(var(--sr-wm-center-gap, 48px) / 2);
+        transform: translate(calc(-50% - var(--sr-wm-center-gap, 48px)/2), -50%) rotate(-30deg);
+        text-align: right;
+    }
+
+    body[data-wm2]::after {
+        content: attr(data-wm2);
+        margin-left: calc(var(--sr-wm-center-gap, 48px) / 2);
+        transform: translate(calc(-50% + var(--sr-wm-center-gap, 48px)/2), -50%) rotate(-30deg);
+        text-align: left;
+    }
+
+    html[data-wm-mode="tile"] body::before,
+    html[data-wm-mode="tile"] body[data-wm2]::before,
+    html[data-wm-mode="tile"] body[data-wm2]::after {
+        content: none !important;
     }
 }
