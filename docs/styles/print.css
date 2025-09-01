@@ -1,0 +1,75 @@
+/* ================================================
+   Print Stylesheet — SudokuResolver
+   ================================================ */
+
+/* ページ余白 */
+@page {
+    margin: 20mm;
+}
+
+/* 全体の基本色を白黒に */
+body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 11pt;
+    line-height: 1.5;
+}
+
+/* カードやコンテナをシンプルに */
+.card,
+.container {
+    background: #fff !important;
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    padding: 1em;
+}
+
+/* リンクは下線＋URL を併記 */
+a {
+    color: #000 !important;
+    text-decoration: underline;
+}
+
+a::after {
+    content: " (" attr(href) ")";
+    font-size: 90%;
+}
+
+/* 見出しを黒強調 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #000 !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+/* ナビゲーションやフッター等は印刷不要 */
+.topbar,
+nav,
+footer {
+    display: none !important;
+}
+
+/* 画像を縮小しすぎない */
+img,
+svg {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* 数式 (LaTeX SVG) を中央寄せ */
+picture,
+img.latex {
+    display: block;
+    margin: 1em auto;
+}
+
+/* 改ページ制御 */
+.section,
+.chapter {
+    page-break-before: always;
+}

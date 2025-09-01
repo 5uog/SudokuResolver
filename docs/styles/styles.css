@@ -1,12 +1,23 @@
 /* =========================================================
-   SudokuResolver — Modern UI Tokens & Topbar Styles (rev3)
-   - Fix: latex画像の横スクロール解消（.tex-img / .math-* 追加）
-   - Fix: .para の強制折返し
+   SudokuResolver — Modern UI Tokens & Topbar Styles (rev4)
+   - Add: スムーススクロール（CSS保険）
+   - Add: --topbar-h での可変オフセット（scroll-margin-top 統一）
+   - Add: KaTeX/画像の後レイアウト揺れに強い余白設定
+   - Keep: latex画像の横スクロール解消（.tex-img / .math-*）
+   - Keep: .para の強制折返し
    ========================================================= */
 
 /* ========== Tokens ========== */
 :root {
     color-scheme: light;
+
+    /* Layout */
+    --topbar-h: 56px;
+    /* ← Topbar の実寸に合わせて調整 */
+
+    /* Transition */
+    --t: 160ms;
+    /* 色系トランジション短め */
 
     /* Light */
     --bg: #ffffff;
@@ -22,9 +33,6 @@
 
     --shadow: 0 8px 24px rgba(15, 18, 23, .06);
     --shadow-strong: 0 12px 28px rgba(15, 18, 23, .12);
-
-    --t: 160ms;
-    /* 色系トランジション短め */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -78,9 +86,15 @@ body {
     transition:
         background-color var(--t) ease,
         color var(--t) ease;
-    /* 念のため：ページ全体の横スクロール抑止 */
+    /* 横スクロール抑止（Safari は clip 推奨。古い環境用に hidden に切替可） */
     overflow-x: clip;
-    /* 必要に応じて hidden */
+    /* Safari 16.4+ */
+    /* overflow-x: hidden; */
+}
+
+/* すべてのアンカー遷移をスムースに（JSが効かない場合の保険） */
+html {
+    scroll-behavior: smooth;
 }
 
 body {
@@ -102,7 +116,6 @@ a:hover {
     max-width: 920px;
     margin: 40px auto;
     padding: 0 20px 80px;
-    /* 背景/文字/枠だけ滑らかに */
     transition:
         background-color var(--t) ease,
         color var(--t) ease,
@@ -119,6 +132,15 @@ a:hover {
         background-color var(--t) ease,
         color var(--t) ease,
         border-color var(--t) ease;
+}
+
+/* 章ブロック */
+.chapter {
+    content-visibility: auto;
+    contain-intrinsic-size: 800px;
+    /* デフォ保険 */
+    /* 固定ヘッダーにぶつからないよう可変オフセット */
+    scroll-margin-top: calc(var(--topbar-h) + 12px);
 }
 
 h1,
@@ -185,17 +207,19 @@ picture,
 video,
 canvas,
 svg {
-    max-width: 100%;
-    height: auto;
+    max-inline-size: 100%;
+    block-size: auto;
 }
 
-/* KaTeX は親の色を継承して色遷移と同調 */
-.katex {
-    color: inherit;
-}
-
-.katex-display {
-    margin: 1.1em 0;
+/* ========== アンカー到達時のオフセット（すべての id 要素に適用） ========== */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+[id] {
+    scroll-margin-top: calc(var(--topbar-h) + 12px);
 }
 
 /* ========== Topbar ========== */
@@ -219,7 +243,7 @@ svg {
     /* 枠 */
     will-change: transform;
     contain: paint;
-    /* 影響域を抑える（再描画を局所化） */
+    /* 再描画を局所化 */
     z-index: 1000;
 }
 
@@ -348,21 +372,58 @@ svg {
     cursor: pointer;
 }
 
-/* ========== 数式画像（LaTeX画像をレスポンシブ化） ========== */
-/* 既存 <img class="tex-img"> 用（デフォはインライン式） */
-.tex-img {
-    display: inline-block;
-    max-width: 100%;
-    width: auto;
-    /* アスペクト比維持 */
-    height: 1.2em;
-    /* 行中サイズ */
-    vertical-align: -0.2em;
-    /* ベースライン微調整 */
-    object-fit: contain;
+/* ========== KaTeX & 数式画像（LaTeX画像をレスポンシブ化） ========== */
+.katex {
+    color: inherit;
 }
 
-/* ブロック表示したい場合は <img class="tex-img block"> を指定 */
+.katex-display {
+    margin: 1.1em 0;
+}
+
+/* KaTeXボックスを親幅内に収める（スクロール無し）*/
+.katex-display>.katex {
+    display: inline-block;
+    max-inline-size: 100%;
+}
+
+figure.eq {
+    margin: 1.2em auto;
+    text-align: center;
+    max-inline-size: 100%;
+    padding-inline: 4px;
+    /* 端のにじみ回避の薄い余白 */
+}
+
+figure.eq>.katex-display,
+figure.eq>script[type="math/tex; mode=display"] {
+    margin: 0 auto;
+    max-inline-size: 100%;
+}
+
+/* インライン/ブロック画像数式のユーティリティ */
+.tex-img {
+    display: inline-block;
+    height: 1em;
+    /* 行中：フォント高に追従 */
+    width: auto;
+    vertical-align: -0.15em;
+    /* ベースライン調整 */
+    line-height: 1;
+}
+
+.tex-block {
+    display: block;
+    margin: 0.5em auto;
+    height: auto;
+    /* 固定高→可変 */
+    max-width: min(100%, 720px);
+    /* 横は親幅に収める */
+    width: auto;
+    vertical-align: middle;
+}
+
+/* ブロック表示にしたい場合は <img class="tex-img block"> を指定 */
 .tex-img.block {
     display: block;
     margin: 1rem auto;
@@ -371,7 +432,7 @@ svg {
     width: auto;
 }
 
-/* .math-* コンテナを使う場合（picture/img どちらでもOK） */
+/* .math-* コンテナ（picture/img どちらでもOK） */
 .math-block {
     display: block;
     margin: 1rem auto;
@@ -401,11 +462,15 @@ svg {
 .math-inline picture,
 .math-inline img {
     display: inline-block;
-    max-width: 100%;
-    height: 1.1em;
-    /* 文字サイズに合わせて縮小 */
+    max-inline-size: 100%;
+    height: 1.05em;
+    /* 1.1em→わずかに低めで行間詰まり回避 */
     width: auto;
     /* アスペクト比維持 */
+}
+
+.math-inline img {
+    vertical-align: -0.15em;
 }
 
 /* ========== A11y: motion/contrast ========== */
@@ -424,5 +489,18 @@ svg {
     :root {
         --border: color-mix(in srgb, var(--border), #000 25%);
         --link: color-mix(in srgb, var(--link), #000 15%);
+    }
+}
+
+/* ===== Optional: color-mix 未対応ブラウザのフェイルセーフ ===== */
+@supports not (color: color-mix(in srgb, #000, #fff)) {
+    .sr-btn--primary:hover {
+        filter: none;
+    }
+
+    /* 見た目差分を最小化 */
+    .topbar[data-elevated],
+    .sr-topbar[data-elevated] {
+        background: var(--bg);
     }
 }
