@@ -15,8 +15,8 @@ function scrollToTarget(target) {
     if (!target) return;
 
     // 一旦フォーカス可能化（A11y）
-    const restoreTabindex = !target.hasAttribute('tabindex');
-    if (restoreTabindex) target.setAttribute('tabindex', '-1');
+    const addedTabindex = !target.hasAttribute('tabindex');
+    if (addedTabindex) target.setAttribute('tabindex', '-1');
 
     const doScroll = () => {
         const topbarH = getTopbarHeight();
@@ -25,6 +25,7 @@ function scrollToTarget(target) {
         const y = Math.max(absoluteY - (topbarH + 12), 0);
         window.scrollTo({ top: y, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
         target.focus({ preventScroll: true });
+        if (addedTabindex) setTimeout(() => target.removeAttribute('tabindex'), 250);
     };
 
     // レイアウトが揺れる（画像/数式）ケースに2回ほど追いスクロール
@@ -50,7 +51,7 @@ function handleAnchorClick(e) {
     e.preventDefault();
     // 同じアンカーを連打しても動くように、先に一旦 hash を外すトリック
     if (location.hash === `#${id}`) {
-        history.replaceState(null, '', ' ');
+        history.replaceState(null, '', location.pathname + location.search);
     }
     history.pushState(null, '', `#${id}`);
     scrollToTarget(target);

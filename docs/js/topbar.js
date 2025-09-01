@@ -180,11 +180,12 @@ function lockMathImageMetrics(img) {
 // ② 差し替え前に描画サイズを一時固定（px）し、差し替え後に復元
 function freezeSize(img) {
     const r = img.getBoundingClientRect();
-    img.style.width = r.width + 'px';
+    const prev = { width: img.style.width, height: img.style.height };
+    img.style.width  = r.width  + 'px';
     img.style.height = r.height + 'px';
     return () => {
-        img.style.height = img.classList.contains('tex-block') ? '1.8em' : '1em';
-        img.style.width = ''; // 幅は aspect-ratio × height で決定
+        img.style.width  = prev.width  || '';
+        img.style.height = prev.height || '';
     };
 }
 
