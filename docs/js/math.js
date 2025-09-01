@@ -16,7 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
             "\\tfrac": "\\dfrac{#1}{#2}",
             "\\sfrac": "\\dfrac{#1}{#2}",
             "\\binom": "\\dbinom{#1}{#2}",
-            "\\tbinom": "\\dbinom{#1}{#2}"
+            "\\tbinom": "\\dbinom{#1}{#2}",
+            "\\bigvee":   "\\mathop{\\vcenter{\\hbox{$\\displaystyle\\Large\\vee$}}}\\displaylimits",
+            "\\bigwedge": "\\mathop{\\vcenter{\\hbox{$\\displaystyle\\Large\\wedge$}}}\\displaylimits",
+            "\\bigsqcup": "\\mathop{\\vcenter{\\hbox{$\\displaystyle\\Large\\sqcup$}}}\\displaylimits",
+            "\\sum":      "\\mathop{\\vcenter{\\hbox{$\\displaystyle\\Large\\Sigma$}}}\\displaylimits"
         },
         throwOnError: false,
         strict: "warn"
