@@ -105,6 +105,7 @@
                     <li><a href="#10-complexity-optimization">10. 複雑性の分析と最適化</a></li>
                     <li><a href="#11-testing">11. テスト規律</a></li>
                     <li><a href="#12-conclusion">12. まとめ</a></li>
+                    <li><a href="#references">参考文献</a></li>
                 </ul>
             </div>
 
@@ -119,8 +120,11 @@
                     Problem, CSP）の代表例として位置づけられる。この視点に立つと、数独は単なる娯楽にとどまらず、計算複雑性理論、抽象代数学、
                     情報理論、さらには実用的なアルゴリズム設計に至るまで多岐にわたる学術的意義を持つことが明らかになる。
                     有限 CSP は厳密には三つ組 $(V,\{D_v\}_{v\in V},C)$ によって与えられる。
+
+                    <p><em>記法</em>：以後、<span class="math">$[9] := \{1,2,\dots,9\}$</span> と略記する。</p>
+                    
                     ここで $V$ は有限の変数集合であり、各 $v\in V$ には有限集合 $D_v$ が値域として割り当てられる。
-                    $C$ は制約の族であり、各制約 $C$ はスコープ $\mathrm{scope}(c)=(v_1,\dots,v_k)$ とその関係 
+                    $C$ は制約の族であり、各制約 $c\in C$ はスコープ $\operatorname{scope}(c)=(v_1,\dots,v_k)$ と、その関係 
 
                     <figure class="eq">
                         $$
@@ -148,7 +152,7 @@
             <div class="para">
                 <p>
                     　一意性の判定 $\mathsf{UNQ}(P)$ は、制約充足問題 $P$ に対して「ただ一つの解が存在するか否か」を問う判定問題である。
-                    形式的には $\mathsf{UNQ}(P) := (\exists \sigma : \sigma \models P)\;\wedge\;\neg(\exists \sigma_1 \neq \sigma_2 : \sigma_1,\sigma_2 \models P)$ と定義される。
+                    形式的には $\mathsf{UNQ}(P) := (\exists \sigma : \sigma \models P)\ \wedge\ \neg\bigl(\exists \sigma_1 \neq \sigma_2 : \sigma_1,\sigma_2 \models P\bigr)$ と定義される。
                     この定義が示すように、一意性は「少なくとも一つの解が存在する」という充足可能性と、「二つ以上の異なる解が存在しない」という排他性の二側面を同時に包含している。
 
                     前者の「充足可能性」判定 $\exists\sigma:\sigma\models P$ は、任意の解 $\sigma$ を証拠として提示すれば多項式時間で検証できるため NP に属する。
@@ -165,7 +169,7 @@
                     </figure>
 
                     である。DP は Papadimitriou によって導入された複雑性クラスであり、NP∩coNP と一致するわけではなく、それを真に含む交わり型のクラスである点に注意を要する。
-                    一般化された数独問題については DP 完全性が知られているが（例：Yato–Sethi, 2003）、ここでは完全性の議論には立ち入らず、帰属に関する説明にとどめる。
+                    一般化された数独問題については DP 完全性が知られているが（例：<a href="#ref-yato-seta-2003">Yato–Seta, 2003</a>）、ここでは完全性の議論には立ち入らず、帰属に関する説明にとどめる。
                 </p>
             </div>
 
@@ -233,7 +237,7 @@
             <div class="para">
                 <p>
                     　候補格子の縮約を定量化するために情報理論的尺度を導入する。
-                    独立一様近似の下で各セルに対し $H(x_{r,c})=\log |S_{r,c}|$ を定義し、盤面の不確実性を $H(P)=\sum_{r,c} \log |S_{r,c}|$ と置く。
+                    独立一様近似の下で各セルに対し $H(x_{r,c})=\log_2 |S_{r,c}|$ を定義し、盤面の不確実性を $H(P)=\sum_{r,c} \log |S_{r,c}|$ と置く。
                     これは真の結合エントロピーに対する上界的ヒューリスティクであり、相関を無視するという近似を内在するものの、縮約作用素の単調性から $\Delta H\le 0$ が常に成り立つ。
                     すなわち、候補削減 $F$ は各セルの候補数 $|S_{r,c}|$ を減少させる方向にしか作用しないため、全体の和 $H(P)$ も必ず単調非増加する。
                 </p>
@@ -297,7 +301,7 @@
                         \begin{aligned}
                         &\bigwedge_{r\in[9]}\ \bigwedge_{\substack{c,c'\in[9]\\ c\neq c'}}\!\bigl(\neg X_{r,c,d}\vee \neg X_{r,c',d}\bigr),\\
                         &\bigwedge_{c\in[9]}\ \bigwedge_{\substack{r,r'\in[9]\\ r\neq r'}}\!\bigl(\neg X_{r,c,d}\vee \neg X_{r',c,d}\bigr),\\
-                        &\bigwedge_{B}\ \bigwedge_{\substack{(r,c),(r',c')\in B\\ (r,c)\neq (r',c')}}\!\bigl(\neg X_{r,c,d}\vee \neg X_{r',c',d}\bigr).
+                        &\bigwedge_{\,\mathcal B}\ \bigwedge_{\substack{(r,c),(r',c')\in \mathcal B\\ (r,c)\neq (r',c')}}\!\bigl(\neg X_{r,c,d}\vee \neg X_{r',c',d}\bigr).
                         \end{aligned}
                         $$
                     </figure>
@@ -315,11 +319,11 @@
 
                     <figure class="eq">
                         $$
-                        \text{cell}_{r,c},\quad \text{row}_{r,d},\quad \text{col}_{c,d},\quad \text{box}_{b,d}
+                        \text{cell}_{r,c},\quad \text{row}_{r,d},\quad \text{col}_{c,d},\quad \text{box}_{\beta,d}
                         $$
                     </figure>
 
-                    で表され、ブロック番号 $b$ はセル座標 $(r,c)$ から $b=3\lfloor(r-1)/3\rfloor+\lfloor(c-1)/3\rfloor+1$ によって一意に定まる。
+                    で表され、ブロック番号 $b$ はセル座標 $(r,c)$ から $\beta=3\lfloor(r-1)/3\rfloor+\lfloor(c-1)/3\rfloor+1$ によって一意に定まる。
                     この規則に従って行列を構成し、該当する制約列に 1 を立てると、問題は「各列をちょうど一度ずつ被覆する行集合」を求める Exact Cover として定式化される。
                     Algorithm X はこの被覆集合を探索する手続きであり、Dancing Links（DLX）はその効率的な連結リスト実装である。
                     正当性は、選ばれた行集合が正確に一つの値割当と 4 種の制約充足を同時に与えることから直ちに従う。
@@ -377,7 +381,7 @@
 
                     <figure class="eq">
                         $$
-                        \mathcal D(P) = \sum_{t=0}^{T-1} \bigl(-\Delta H_t\bigr) + \lambda \sum_{b \in B}\bigl(1+\mu\,\mathrm{depth}(b)\bigr)
+                        \mathcal D(P) = \sum_{t=0}^{T-1} \bigl(-\Delta H_t\bigr) + \lambda \sum_{b \in \mathcal T}\bigl(1+\mu\,\mathrm{depth}(b)\bigr)
                         $$
                     </figure>
 
@@ -386,7 +390,7 @@
                     定数 $\lambda,\mu>0$ は単位系を整えるための重みであり、推論が停滞する局面では探索コストが支配的に、推論が強力に働く局面では $-\Delta H_t$ が支配的となる。
                 </p>
             </div>
-            
+
             <div class="para">
                 <p>
                     　経験的観察によれば、$-\Delta H_t$ の寄与はしばしばサブモジュラ関数に類似した漸減性を示す。
@@ -807,6 +811,18 @@
 
             以上を総合すれば、SudokuResolver は、数理的基盤に支えられた解読コア、形式的に定義された難易度評価体系、DLX に基づく厳密な一意性保証を備えた問題生成器、そして透明性と教育的価値を重視した GUI
             を統合する総合的システムである。この設計は単なる娯楽的ツールを超えて、制約充足問題の実用的応用、数理的推論教育の教材、さらには人間型推論と計算機推論との交錯を観察する実験的プラットフォームとして学術的意義を持つものである。
+
+            <!-- ===== 参考文献 ====== -->
+            <h2 id="references">参考文献</h2>
+            
+            <ul class="references">
+                <li id="ref-yato-seta-2003">
+                    Yato, T., &amp; Seta, T. (2003).
+                    <em>Complexity and Completeness of Finding Another Solution and Its Application to Puzzles</em>.
+                    <span>IEICE Transactions on Fundamentals of Electronics, Communications and Computer Sciences</span>,
+                    E86-A(5), 1052–1060.
+                </li>
+            </ul>
 
             <p class="muted">© SudokuResolver Docs</p>
     </div>

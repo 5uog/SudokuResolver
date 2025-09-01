@@ -601,7 +601,7 @@ figure.eq .katex-display>.katex {
     .katex-display .mop > .op-symbol {
         font-size: 1.60em !important;
         line-height: 1.08;
-        vertical-align: -0.12em;
+        vertical-align: -0.1em;
     }
 
     /* --- 2) limits（上下添字）の詰まり解消 --- */
