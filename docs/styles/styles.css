@@ -1,8 +1,8 @@
 /* =========================================================
-   SudokuResolver — Modern UI Tokens & Topbar Styles (rev4)
-   - Add: スムーススクロール（CSS保険）
-   - Add: --topbar-h での可変オフセット（scroll-margin-top 統一）
-   - Add: KaTeX/画像の後レイアウト揺れに強い余白設定
+   SudokuResolver — Modern UI Tokens & Topbar Styles (rev5)
+   - Add: 数式ブロックの右側に出る縦スクロールバーを抑止
+   - Add: KaTeX の折返しを強制（white-space: normal !important 等）
+   - Keep: スムーススクロール、--topbar-h の可変オフセット
    - Keep: latex画像の横スクロール解消（.tex-img / .math-*）
    - Keep: .para の強制折返し
    ========================================================= */
@@ -13,11 +13,9 @@
 
     /* Layout */
     --topbar-h: 56px;
-    /* ← Topbar の実寸に合わせて調整 */
 
     /* Transition */
     --t: 160ms;
-    /* 色系トランジション短め */
 
     /* Light */
     --bg: #ffffff;
@@ -82,17 +80,13 @@ body {
     padding: 0;
     background: var(--bg);
     color: var(--fg);
-    /* “色だけ”遷移。all/影/フィルタは対象にしない */
     transition:
         background-color var(--t) ease,
         color var(--t) ease;
-    /* 横スクロール抑止（Safari は clip 推奨。古い環境用に hidden に切替可） */
     overflow-x: clip;
-    /* Safari 16.4+ */
-    /* overflow-x: hidden; */
 }
 
-/* すべてのアンカー遷移をスムースに（JSが効かない場合の保険） */
+/* JS無効時もアンカー遷移を滑らかに（保険） */
 html {
     scroll-behavior: smooth;
 }
@@ -138,8 +132,6 @@ a:hover {
 .chapter {
     content-visibility: auto;
     contain-intrinsic-size: 800px;
-    /* デフォ保険 */
-    /* 固定ヘッダーにぶつからないよう可変オフセット */
     scroll-margin-top: calc(var(--topbar-h) + 12px);
 }
 
@@ -211,7 +203,7 @@ svg {
     block-size: auto;
 }
 
-/* ========== アンカー到達時のオフセット（すべての id 要素に適用） ========== */
+/* アンカー到達時のオフセット（すべての id 要素に適用） */
 h1,
 h2,
 h3,
@@ -236,24 +228,18 @@ h6,
     box-shadow: var(--shadow);
     transition:
         transform .30s ease,
-        /* 自身の移動のみ */
         background-color var(--t) ease,
-        /* 色 */
         border-color var(--t) ease;
-    /* 枠 */
     will-change: transform;
     contain: paint;
-    /* 再描画を局所化 */
     z-index: 1000;
 }
 
-/* スクロール方向で表示/非表示 */
 .topbar[data-hidden],
 .sr-topbar[data-hidden] {
     transform: translateY(-100%);
 }
 
-/* ページ先頭を離れたらエレベーション付与 */
 .topbar[data-elevated],
 .sr-topbar[data-elevated] {
     box-shadow: var(--shadow-strong);
@@ -310,7 +296,6 @@ h6,
         color 120ms ease,
         border-color 120ms ease,
         transform 80ms ease;
-    /* 押下のみ */
 }
 
 .sr-btn:active {
@@ -372,19 +357,39 @@ h6,
     cursor: pointer;
 }
 
-/* ========== KaTeX & 数式画像（LaTeX画像をレスポンシブ化） ========== */
+/* ========== KaTeX & 数式画像 ========== */
 .katex {
     color: inherit;
 }
+
+/* --- 数式ブロック：縦スクロールバー抑止 + 折返し強制 --- */
+.katex-display,
+figure.eq {
+    overflow-x: hidden;
+    overflow-y: visible;
+    max-width: 100%;
+    white-space: normal !important;
+    word-break: break-word;
+    line-break: anywhere;
+    scrollbar-width: none;
+}
+
+.katex-display::-webkit-scrollbar,
+figure.eq::-webkit-scrollbar {
+    display: none;
+}
+
+/* Chrome/Safari/Edge */
 
 .katex-display {
     margin: 1.1em 0;
 }
 
-/* KaTeXボックスを親幅内に収める（スクロール無し）*/
+/* KaTeXボックスを親幅内に収める */
 .katex-display>.katex {
     display: inline-block;
     max-inline-size: 100%;
+    white-space: normal !important;
 }
 
 figure.eq {
@@ -392,7 +397,6 @@ figure.eq {
     text-align: center;
     max-inline-size: 100%;
     padding-inline: 4px;
-    /* 端のにじみ回避の薄い余白 */
 }
 
 figure.eq>.katex-display,
@@ -401,14 +405,18 @@ figure.eq>script[type="math/tex; mode=display"] {
     max-inline-size: 100%;
 }
 
-/* インライン/ブロック画像数式のユーティリティ */
+figure.eq .katex-display>.katex {
+    display: inline-block;
+    max-inline-size: 100%;
+    white-space: normal !important;
+}
+
+/* インライン/ブロック画像数式ユーティリティ */
 .tex-img {
     display: inline-block;
     height: 1em;
-    /* 行中：フォント高に追従 */
     width: auto;
     vertical-align: -0.15em;
-    /* ベースライン調整 */
     line-height: 1;
 }
 
@@ -416,9 +424,7 @@ figure.eq>script[type="math/tex; mode=display"] {
     display: block;
     margin: 0.5em auto;
     height: auto;
-    /* 固定高→可変 */
     max-width: min(100%, 720px);
-    /* 横は親幅に収める */
     width: auto;
     vertical-align: middle;
 }
@@ -437,7 +443,6 @@ figure.eq>script[type="math/tex; mode=display"] {
     display: block;
     margin: 1rem auto;
     text-align: center;
-    /* センター寄せ */
     max-width: 100%;
 }
 
@@ -456,7 +461,6 @@ figure.eq>script[type="math/tex; mode=display"] {
     display: inline-block;
     max-width: 100%;
     vertical-align: -0.2em;
-    /* 行中での上下位置微調整 */
 }
 
 .math-inline picture,
@@ -464,9 +468,7 @@ figure.eq>script[type="math/tex; mode=display"] {
     display: inline-block;
     max-inline-size: 100%;
     height: 1.05em;
-    /* 1.1em→わずかに低めで行間詰まり回避 */
     width: auto;
-    /* アスペクト比維持 */
 }
 
 .math-inline img {
@@ -502,5 +504,12 @@ figure.eq>script[type="math/tex; mode=display"] {
     .topbar[data-elevated],
     .sr-topbar[data-elevated] {
         background: var(--bg);
+    }
+}
+
+/* ===== 小画面で長式の視認性を少し上げる（任意） ===== */
+@media (max-width: 640px) {
+    .katex-display {
+        font-size: 0.95em;
     }
 }
