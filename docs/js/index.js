@@ -11,6 +11,7 @@ import * as Print from './utils/print.js';
 import * as Loading from './utils/loading-overlay.js';
 import * as FAQ from './utils/faq.js';
 import { setupApproachLazyLoad } from './utils/approach-loader.js';
+import { initHashlessAnchors } from './utils/hashless-anchors.js';
 
 // --- UI components ---
 import { renderNavbar } from './components/nav.js';
@@ -23,10 +24,31 @@ Loading.init({
     backdropOpacity: 0.18,
 });
 
+// ---- /docs/ 基準を import.meta.url から堅牢に抽出（GH Pages / ローカル両対応） ----
+function getDocsBaseDir() {
+    try {
+        const u = new URL(import.meta.url);            // 例: /SudokuResolver/docs/js/index.js or /docs/js/index.js
+        const p = u.pathname;
+        const i = p.indexOf('/docs/');
+        if (i !== -1) return p.slice(0, i + '/docs/'.length); // "/SudokuResolver/docs/" or "/docs/"
+    } catch { }
+    // フォールバック（まず使われない想定）
+    return '/docs/';
+}
+function normalizePath(p) {
+    return p.replace(/\/index\.html?$/i, '/');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     let active = '';
 
     try {
+        // 直リンク(#あり)以外は必ず先頭へ（内側コンテナも0に）— 残留スクロール対策
+        if (!location.hash) {
+            window.scrollTo(0, 0);
+            document.querySelectorAll('.approach__scroll').forEach(el => (el.scrollTop = 0));
+        }
+
         // 0) 動作環境・ユーザー設定
         const prefersReducedMotion =
             window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
@@ -35,10 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 1) テーマ適用
         Theme.init();
 
-        // 1.1) グローバル色相アニメ
-        // CSS(@property + keyframes) と JS フォールバックの競合を避ける:
-        // - Houdini対応 → CSSのみ（data-hue-animate="on" を付与）
-        // - 非対応 → CSSは無効のまま（属性を付けない）で JS を起動
+        // 1.1) グローバル色相アニメ（reduce-motion 配慮）
         if (!prefersReducedMotion && hasHoudini) {
             document.documentElement.setAttribute('data-hue-animate', 'on');
         } else {
@@ -46,19 +65,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!prefersReducedMotion) {
                 try {
                     const { startHueCycle } = await import('./utils/hue-animate.js');
-                    // 読みやすさ優先で寒色〜紫に限定（必要なら 0–360 へ）
                     startHueCycle({
-                        periodMs: 60000, // 60秒/周（好みで調整）
+                        periodMs: 60000,
                         min: 0,
                         max: 360,
                         unit: 'deg',
-                        registerProperty: true, // 可能なら登録（補間の安定化）
+                        registerProperty: true,
                     });
                 } catch (e) {
                     console.warn('[hue-cycle] JS fallback failed or module missing:', e);
                 }
             } else {
-                // reduce-motion の場合は動きを止める（念のためJS側も停止）
                 try {
                     const { stopHueCycle } = await import('./utils/hue-animate.js');
                     stopHueCycle();
@@ -66,14 +83,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // 2) ルーティング判定
-        const path = location.pathname;
-        active =
-            path.endsWith('/docs/') || path.endsWith('/docs/index.html')
-                ? 'home'
-                : path.includes('/docs/math/')
-                    ? 'math'
-                    : '';
+        // 1.2) ハッシュ無しアンカー（最初期にセット：URLを汚さずスクロール）
+        initHashlessAnchors({
+            smooth: true,
+            containerSelectors: ['.approach__scroll', '.approach__frame'], // ← 内側を優先
+            innerOffset: 10,                         // 見出しの上に少し余白（8〜16で好み調整）
+            detectScrollableAncestor: true,         // 近傍のスクロール祖先を自動検出
+            // headerOffset は未指定で OK（--header-height を自動参照）
+        });
+
+        // 2) ルーティング判定（/docs/ を基準に安定検出）
+        const docsBase = getDocsBaseDir();                           // 例: "/SudokuResolver/docs/" or "/docs/"
+        const here = normalizePath(location.pathname);               // index.html 正規化
+        const docsHome = normalizePath(docsBase);                    // "/.../docs/"
+        const inMath = here.startsWith(normalizePath(docsBase + 'math/'));
+        active = (here === docsHome) ? 'home' : (inMath ? 'math' : '');
 
         // 3) ナビ/フッター描画
         renderNavbar(active);
@@ -82,21 +106,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 4) 上部UI・各ユーティリティ
         Topbar.init();
         Formula.init();
+
+        // 【重要】scroll.js 側は“可視領域検出・オフセット”中心に使う
+        // クリック横取りは hashless-anchors が担当するため、該当オプションがあれば無効化。
+        // （対応していない実装でも、capture=true でこちらが優先されるため大丈夫）
         initAnchorOffsetScroll({
             extraOffset: 12,
-            smooth: true,
+            smooth: !prefersReducedMotion,
             scrollContainer: 'auto',
+            // もし util がサポートしていれば以下を渡してクリック横取り/URL書き換えを抑止
+            interceptClicks: false,
+            hashMode: 'ignore',
             activeLink: {
                 enable: true,
-                sectionSelector: '.approach__layout section[id], section[id]',
+                // 見出し(h2)を追跡＋保険で section[id] も含める（あなたの構造に合わせる）
+                sectionSelector: '#approach-doc h2[id], .approach__scroll h2[id], section[id]',
+                // TOCは .approach__toc-inline、ナビ内ancherも拾う
                 linkQuery: (id) =>
-                    `.approach__toc a[href="#${id}"], .nav__menu a[href*="#${id}"]`,
+                    `.approach__toc-inline a[href="#${id}"], .nav__menu a[href*="#${id}"]`,
                 activeClass: 'active-link',
                 setAriaCurrent: true,
                 minVisibleRatio: 0.35,
                 bottomGuardRatio: 0.45,
             },
         });
+
         initMathKatex();
         Guards.init?.();
         Print.init?.();
@@ -140,5 +174,12 @@ window.addEventListener('pageshow', (ev) => {
         try {
             Loading.ready();
         } catch { }
+        // 直リンク(#あり)以外は復帰時もトップへ（内側コンテナも0に）
+        if (!location.hash) {
+            requestAnimationFrame(() => {
+                window.scrollTo(0, 0);
+                document.querySelectorAll('.approach__scroll').forEach(el => (el.scrollTop = 0));
+            });
+        }
     }
 });
