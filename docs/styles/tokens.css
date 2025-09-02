@@ -1,0 +1,71 @@
+/*=============== TOKENS ===============*/
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900&display=swap");
+
+:root {
+    --header-height: 3.5rem;
+
+    --hue: 0;
+    --first-color: hsl(var(--hue), 60%, 64%);
+    --first-color-alt: hsl(var(--hue), 80%, 56%);
+    --first-color-alt-2: hsl(var(--hue), 60%, 56%) !important;
+    --first-color-light: hsl(var(--hue), 60%, 74%);
+    --title-color: hsl(240, 8%, 95%);
+    --text-color: hsl(240, 8%, 70%);
+    --text-color-light: hsl(240, 8%, 50%);
+    --body-color: hsl(240, 100%, 2%);
+    --container-color: hsl(240, 8%, 6%);
+
+    --body-font: "Montserrat", sans-serif;
+    --second-font: "Unbounded", sans-serif;
+    --biggest-font-size: 2rem;
+    --bigger-font-size: 1.75rem;
+    --h1-font-size: 1.5rem;
+    --h2-font-size: 1.25rem;
+    --h3-font-size: 1rem;
+    --normal-font-size: .938rem;
+    --small-font-size: .813rem;
+    --smaller-font-size: .75rem;
+
+    --font-regular: 400;
+    --font-medium: 500;
+    --font-semi-bold: 600;
+
+    --z-tooltip: 10;
+    --z-fixed: 100;
+
+    --sr-anchor-offset: calc(var(--topbar-h, var(--header-height, 56px)) + 12px);
+}
+
+@property --hue {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+}
+
+@keyframes hue-cycle {
+    0%   { --hue: 0; }
+    100% { --hue: 359.99; }
+}
+
+:root[data-hue-animate="on"] {
+    animation: hue-cycle 15s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root[data-hue-animate="on"] {
+        animation: none;
+    }
+}
+
+@media screen and (min-width: 1150px) {
+    :root {
+        --biggest-font-size: 3rem;
+        --bigger-font-size: 2rem;
+        --h1-font-size: 2.25rem;
+        --h2-font-size: 1.5rem;
+        --h3-font-size: 1.25rem;
+        --normal-font-size: 1rem;
+        --small-font-size: .875rem;
+        --smaller-font-size: .813rem;
+    }
+}

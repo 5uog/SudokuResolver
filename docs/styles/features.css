@@ -1,0 +1,106 @@
+/*=============== FEATURES ===============*/
+.features .section__title {
+    text-align: initial;
+    margin-left: 1.5rem;
+}
+
+.features__card {
+    position: relative;
+    background-color: var(--container-color);
+    padding: 1.5rem;
+    border-radius: 3rem;
+    overflow: hidden;
+}
+
+.features__card .blob {
+    z-index: 0;
+    right: -7.75rem;
+    bottom: 0;
+}
+
+.features__number,
+.features__data,
+.features__image {
+    position: relative;
+    z-index: 1;
+}
+
+.features__number {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.features__number h1 {
+    font-size: var(--biggest-font-size);
+}
+
+.features__number h3 {
+    font-weight: var(--font-regular);
+    font-size: var(--h3-font-size);
+}
+
+.features__data {
+    margin-block: 2rem;
+}
+
+.features__title {
+    font-size: var(--h2-font-size);
+    margin-bottom: 1rem;
+}
+
+.features__subtitle {
+    font-family: var(--second-font);
+    font-size: var(--small-font-size);
+    margin-bottom: .5rem;
+}
+
+.features__description {
+    font-size: var(--small-font-size);
+}
+
+.features__img {
+    border-radius: 1.5rem;
+}
+
+.features__button {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    background-color: var(--body-color);
+    border: 3px solid var(--first-color);
+    border-radius: 50%;
+    color: var(--title-color);
+    font-size: 2rem;
+    position: absolute;
+    top: .75rem;
+    right: .75rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: box-shadow .4s, opacity .4s;
+}
+
+.features__button:hover {
+    box-shadow: 0 0 24px var(--first-color);
+}
+
+.features__image:hover .features__button {
+    opacity: 1;
+    pointer-events: initial;
+}
+
+/* Swiper class */
+.features__swiper {
+    margin-inline: initial;
+    padding-bottom: 2rem;
+}
+
+.features .swiper-pagination-bullets {
+    bottom: 0;
+}
+
+.features .swiper-pagination-bullet {
+    background-color: var(--first-color);
+    transition: opacity .4s;
+}

@@ -1,14 +1,17 @@
 /* ======================================================
                   docs/js/utils/scroll.js
-          アンカー & offset スクロール（強化版）
+                アンカー & offset スクロール
    ------------------------------------------------------
    - 固定ヘッダ分のオフセットを考慮して #id にスクロール
    - reduce-motion を尊重し、rAF 合成で位置を安定化
    - 初期ハッシュ / hashchange / クリックを横断処理
    - scroll-margin-top を自動考慮（任意で無効化可）
-   - 公開API: getTopbarHeight(), 
-              scrollToTarget(), 
-              initAnchorOffsetScroll(options), 
+   - セクション可視率に応じてナビの active/aria-current を同期
+   - 内側スクロール容器（div など）へも対応
+   - 公開API: getTopbarHeight(),
+              scrollToTarget(),
+              scrollToTop(),
+              initAnchorOffsetScroll(options),
               destroyAnchorOffsetScroll()
    ====================================================== */
 
@@ -16,12 +19,16 @@ import { reducedMotionMQL, rafQueueOnce } from '../core/events.js';
 
 /**
  * @typedef {Object} AnchorScrollOptions
- * @property {string}   [cssVarName='--topbar-h']     固定ヘッダ高の CSS カスタムプロパティ名
+ * @property {string}   [cssVarName='--topbar-h']         固定ヘッダ高の CSS カスタムプロパティ名
  * @property {string}   [topbarSelector='.sr-topbar, .topbar'] ヘッダ候補セレクタ
- * @property {number}   [extraOffset=12]              ヘッダ高に足すゆとりpx
- * @property {boolean}  [smooth=true]                 reduce-motion でない場合に smooth するか
- * @property {number[]} [retryDelays=[0,16,180]]      レイアウト揺れに対する追いスクロール(ms)
- * @property {boolean}  [respectScrollMargin=true]    target の scroll-margin-top を加味するか
+ * @property {number}   [extraOffset=12]                  ヘッダ高に足すゆとりpx
+ * @property {boolean}  [smooth=true]                     reduce-motion でない場合に smooth するか
+ * @property {number[]} [retryDelays=[0,16,180]]          レイアウト揺れに対する追いスクロール(ms)
+ * @property {boolean}  [respectScrollMargin=true]        target の scroll-margin-top を加味するか
+ * @property {'window'|'auto'|Element|string} [scrollContainer='window']
+ *           スクロール先の容器。'window'（既定） / 'auto'（targetの最寄りスクロール容器） /
+ *           Element / CSS セレクタ文字列
+ * @property {Object}   [activeLink]                      セクション可視に応じたリンク強調の設定
  */
 
 /* ------------------------------
@@ -29,7 +36,7 @@ import { reducedMotionMQL, rafQueueOnce } from '../core/events.js';
  * ------------------------------ */
 let _inited = false;
 let _opts   /** @type {AnchorScrollOptions|null} */ = null;
-const _handlers = { click: null, load: null, hashchange: null };
+const _handlers = { click: null, load: null, hashchange: null, pageshow: null };
 
 /* ------------------------------
  * 内部ユーティリティ
@@ -40,28 +47,27 @@ const _reducedMQL =
         ? window.matchMedia('(prefers-reduced-motion: reduce)')
         : null);
 
-// rafQueueOnce が未提供でも rAF 一回で実行する
 const _rafOnce = (key, fn) => {
     if (typeof rafQueueOnce === 'function') return rafQueueOnce(key, fn);
     return requestAnimationFrame(() => { try { fn(); } catch { /* noop */ } });
 };
 
-// スクロール可能なドキュメントの現在オフセットを取得（古いブラウザ考慮）
 function _pageYOffset() {
     return window.pageYOffset ?? window.scrollY ?? document.documentElement.scrollTop ?? 0;
 }
 
-// アンカー候補を取得：id → name 属性の順に探索
+function _normalizePath(p) {
+    return String(p || '').replace(/\/index\.html$/, '/');
+}
+
 function _findAnchor(id) {
     if (!id) return null;
     let el = document.getElementById(id);
     if (el) return el;
-    // 古い <a name="..."> 対応（唯一に限定）
     const byName = document.querySelector(`a[name="${CSS.escape(id)}"]`);
     return byName || null;
 }
 
-// 要素が視認可能（display:none 等でない）かの緩い判定
 function _isRenderable(el) {
     if (!(el instanceof Element)) return false;
     const style = getComputedStyle(el);
@@ -86,59 +92,103 @@ export function getTopbarHeight({
 }
 
 /* ------------------------------
+ * スクロール容器の解決
+ * ------------------------------ */
+function _findScrollContainer(el) {
+    let node = el?.parentElement;
+    while (node) {
+        const s = getComputedStyle(node);
+        if ((s.overflowY === 'auto' || s.overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+            return node;
+        }
+        node = node.parentElement;
+    }
+    return null;
+}
+
+function _resolveScrollContainer(target) {
+    const sc = _opts?.scrollContainer ?? 'window';
+    if (sc === 'window') return null; // null を window 扱いに統一
+    if (sc === 'auto') return _findScrollContainer(target) || null;
+    if (typeof sc === 'string') {
+        try { return document.querySelector(sc) || null; } catch { return null; }
+    }
+    if (sc && sc.nodeType === 1) return sc;
+    return null;
+}
+
+/* ------------------------------
+ * 先頭へスクロール（公開API）
+ * ------------------------------ */
+export function scrollToTop({ smooth = true } = {}) {
+    const wantsSmooth = !!(smooth && !_reducedMQL?.matches);
+    const behavior = wantsSmooth ? 'smooth' : 'auto';
+    window.scrollTo({ top: 0, left: 0, behavior });
+}
+
+/* ------------------------------
  * ターゲットへオフセット付きスクロール
  * ------------------------------ */
 export function scrollToTarget(target, {
-    cssVarName = '--topbar-h',
-    topbarSelector = '.sr-topbar, .topbar',
-    extraOffset = 12,
-    smooth = true,
-    retryDelays = [0, 16, 180],
-    respectScrollMargin = true,
+    cssVarName = _opts?.cssVarName ?? '--topbar-h',
+    topbarSelector = _opts?.topbarSelector ?? '.sr-topbar, .topbar',
+    extraOffset = _opts?.extraOffset ?? 12,
+    smooth = _opts?.smooth ?? true,
+    retryDelays = _opts?.retryDelays ?? [0, 16, 180],
+    respectScrollMargin = _opts?.respectScrollMargin ?? true,
+    scrollContainer = _opts?.scrollContainer ?? 'window',
 } = {}) {
-    if (!target) return;
-
-    // 非表示要素は無視（:target 競合の防止）
+    if (!target || target === document.documentElement || target === document.body) {
+        return scrollToTop({ smooth });
+    }
     if (!_isRenderable(target)) return;
 
-    // A11y: 一時的にフォーカス可能化
     const addedTabindex = !target.hasAttribute('tabindex');
     if (addedTabindex) target.setAttribute('tabindex', '-1');
 
     const doScroll = () => {
-        const topbarH = getTopbarHeight({ cssVarName, topbarSelector });
-        const rect = target.getBoundingClientRect();
-        const absoluteY = _pageYOffset() + rect.top;
+        const container = (scrollContainer === _opts?.scrollContainer)
+            ? _resolveScrollContainer(target)
+            : (scrollContainer === 'window' ? null
+                : (scrollContainer === 'auto' ? _findScrollContainer(target) || null
+                    : (typeof scrollContainer === 'string'
+                        ? (document.querySelector(scrollContainer) || null)
+                        : (scrollContainer && scrollContainer.nodeType === 1 ? scrollContainer : null))));
 
-        // scroll-margin-top を考慮（CSS 側で指定があれば尊重）
+        const topbarH = getTopbarHeight({ cssVarName, topbarSelector });
+
+        // scroll-margin-top
         let smt = 0;
         if (respectScrollMargin) {
             const c = getComputedStyle(target);
             const v = parseFloat(c.scrollMarginTop || '0');
             if (!Number.isNaN(v)) smt = Math.max(0, v);
         }
-
-        // 合計オフセット = 固定ヘッダ + 余白 + scroll-margin-top
         const offset = topbarH + extraOffset + smt;
-        const y = Math.max(absoluteY - offset, 0);
 
         const wantsSmooth = !!(smooth && !_reducedMQL?.matches);
-        // Safari の二重スクロール抑止のため、現在位置との差が小さい場合は auto
-        const delta = Math.abs(_pageYOffset() - y);
-        const behavior = delta < 2 ? 'auto' : (wantsSmooth ? 'smooth' : 'auto');
 
-        window.scrollTo({ top: y, behavior });
-
-        // スクロール後にフォーカス（追加スクロールは抑止）
-        try { target.focus?.({ preventScroll: true }); } catch { /* noop */ }
-
-        if (addedTabindex) {
-            // 連打対策で少し待ってから戻す
-            setTimeout(() => target.removeAttribute('tabindex'), 250);
+        if (!container) {
+            // window
+            const rect = target.getBoundingClientRect();
+            const yAbs = _pageYOffset() + rect.top;
+            const y = Math.max(yAbs - offset, 0);
+            const delta = Math.abs(_pageYOffset() - y);
+            const behavior = delta < 2 ? 'auto' : (wantsSmooth ? 'smooth' : 'auto');
+            window.scrollTo({ top: y, behavior });
+        } else {
+            // 内側コンテナ
+            const tRect = target.getBoundingClientRect();
+            const cRect = container.getBoundingClientRect();
+            const y = Math.max(container.scrollTop + (tRect.top - cRect.top) - offset, 0);
+            const behavior = wantsSmooth ? 'smooth' : 'auto';
+            container.scrollTo({ top: y, behavior });
         }
+
+        try { target.focus?.({ preventScroll: true }); } catch { /* noop */ }
+        if (addedTabindex) setTimeout(() => target.removeAttribute('tabindex'), 250);
     };
 
-    // レイアウト揺れ（KaTeX/画像ロードなど）に備えて複数回実行
     for (const ms of retryDelays) {
         if (ms === 0) _rafOnce('anchor@0', doScroll);
         else setTimeout(() => _rafOnce(`anchor@${ms}`, doScroll), ms);
@@ -151,8 +201,8 @@ export function scrollToTarget(target, {
 function _shouldHandleClick(e, a) {
     if (!a) return false;
     if (e.defaultPrevented) return false;
-    if (e.button !== 0) return false; // 左クリックのみ
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false; // 新規タブ等はブラウザ任せ
+    if (e.button !== 0) return false;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false;
     if (a.getAttribute('target') && a.getAttribute('target') !== '_self') return false;
     if (a.hasAttribute('download')) return false;
 
@@ -161,9 +211,7 @@ function _shouldHandleClick(e, a) {
 
     const url = new URL(href, location.href);
     if (url.origin !== location.origin) return false;
-    if (url.pathname !== location.pathname) return false;
-    if (!url.hash) return false;
-
+    if (_normalizePath(url.pathname) !== _normalizePath(location.pathname)) return false;
     return true;
 }
 
@@ -172,17 +220,22 @@ function handleAnchorClick(e) {
     if (!_shouldHandleClick(e, a)) return;
 
     const url = new URL(a.getAttribute('href'), location.href);
-    const id = decodeURIComponent(url.hash.slice(1));
-    if (!id) return;
+    const idRaw = (url.hash || '').slice(1);
+    const id = idRaw ? decodeURIComponent(idRaw) : '';
+
+    if (!id || id.toLowerCase() === 'top') {
+        e.preventDefault();
+        if (location.hash) history.replaceState(null, '', _normalizePath(location.pathname) + location.search);
+        scrollToTop({ smooth: _opts?.smooth !== false });
+        return;
+    }
 
     const target = _findAnchor(id);
     if (!target) return;
 
     e.preventDefault();
-
-    // 同一ハッシュ連打：一旦 hash を外してから push
     if (location.hash === `#${id}`) {
-        history.replaceState(null, '', location.pathname + location.search);
+        history.replaceState(null, '', _normalizePath(location.pathname) + location.search);
     }
     history.pushState(null, '', `#${id}`);
 
@@ -190,19 +243,169 @@ function handleAnchorClick(e) {
 }
 
 function _scrollIfHashPresent() {
-    if (location.hash.length <= 1) return;
-    const id = decodeURIComponent(location.hash.slice(1));
+    const raw = location.hash;
+    if (!raw) return;
+
+    const id = decodeURIComponent(raw.slice(1));
+    if (!id || id.toLowerCase() === 'top') {
+        _rafOnce('anchor@init-top', () => scrollToTop({ smooth: _opts?.smooth !== false }));
+        return;
+    }
+
     const target = _findAnchor(id);
     if (!target) return;
-
-    // 初期はレイアウト確定後（rAF + 追いスクロール）
     _rafOnce('anchor@init', () => scrollToTarget(target, _opts || undefined));
 }
 
 function handleHashChange() {
-    // ブラウザ標準の #target スクロールが先に走る可能性があるため、
-    // rAF で上書きする（固定ヘッダ分の補正を適用）
     _scrollIfHashPresent();
+}
+
+/* ======================================================
+ * セクション可視率に基づく active-link/aria-current
+ * ====================================================== */
+
+let _active = {
+    enabled: false,
+    sections: [],
+    observer: null,
+    idToLinks: new Map(),
+    ratios: new Map(),
+    currentId: null
+};
+
+const ACTIVE_DEFAULTS = Object.freeze({
+    enable: false,
+    sectionSelector: 'section[id]',
+    linkQuery: (id) => `.nav__menu a[href*="#${CSS.escape(id)}"], .approach__toc a[href="#${CSS.escape(id)}"]`,
+    activeClass: 'active-link',
+    setAriaCurrent: true,
+    minVisibleRatio: 0.3,
+    bottomGuardRatio: 0.4,
+    headerOffsetPx: null, // 明示したい場合のみ。null なら自動推定
+});
+
+function _updateActiveLinks(nextId) {
+    if (_active.currentId === nextId) return;
+    const prev = _active.currentId;
+    _active.currentId = nextId || null;
+
+    if (prev) {
+        const prevLinks = _active.idToLinks.get(prev) || [];
+        prevLinks.forEach(a => {
+            a.classList.remove(_opts?.activeLink?.activeClass || ACTIVE_DEFAULTS.activeClass);
+            if (_opts?.activeLink?.setAriaCurrent ?? ACTIVE_DEFAULTS.setAriaCurrent) {
+                a.removeAttribute('aria-current');
+            }
+        });
+    }
+
+    if (nextId) {
+        const nextLinks = _active.idToLinks.get(nextId) || [];
+        nextLinks.forEach(a => {
+            a.classList.add(_opts?.activeLink?.activeClass || ACTIVE_DEFAULTS.activeClass);
+            if (_opts?.activeLink?.setAriaCurrent ?? ACTIVE_DEFAULTS.setAriaCurrent) {
+                a.setAttribute('aria-current', 'page');
+            }
+        });
+    }
+}
+
+function _onIntersections(entries) {
+    for (const entry of entries) {
+        const id = entry.target.id;
+        if (!id) continue;
+        _active.ratios.set(id, entry.isIntersecting ? entry.intersectionRatio : 0);
+    }
+
+    const minRatio = _opts?.activeLink?.minVisibleRatio ?? ACTIVE_DEFAULTS.minVisibleRatio;
+    let bestId = null; let bestRatio = minRatio;
+    for (const [id, r] of _active.ratios.entries()) {
+        if (r > bestRatio) { bestRatio = r; bestId = id; }
+    }
+
+    if (!bestId) {
+        const y = _pageYOffset();
+        let nearest = null; let nearestDy = Infinity;
+        for (const sec of _active.sections) {
+            const top = sec.getBoundingClientRect().top + y;
+            const dy = Math.abs(top - y);
+            if (dy < nearestDy) { nearest = sec; nearestDy = dy; }
+        }
+        bestId = nearest?.id || null;
+    }
+
+    _updateActiveLinks(bestId);
+}
+
+function _initSectionActiveLinks() {
+    const cfg = { ...ACTIVE_DEFAULTS, ...(_opts?.activeLink || {}) };
+    if (!cfg.enable) return;
+
+    _active.enabled = true;
+
+    _active.sections = Array.from(document.querySelectorAll(cfg.sectionSelector))
+        .filter(_isRenderable)
+        .filter(sec => !!sec.id);
+
+    _active.idToLinks.clear();
+    for (const sec of _active.sections) {
+        const id = sec.id;
+        const qs = cfg.linkQuery(id);
+        const links = qs ? Array.from(document.querySelectorAll(qs)) : [];
+        _active.idToLinks.set(id, links);
+        _active.ratios.set(id, 0);
+    }
+    if (_active.sections.length === 0) return;
+
+    // IO の root を決定：scrollContainer が window 以外ならそのコンテナ
+    // （コンテナ内で可視判定を行う）
+    const sampleTarget = _active.sections[0];
+    const container = _resolveScrollContainer(sampleTarget);
+
+    // ヘッダ分の上側オフセット（window のときだけ適用）
+    let topOffset = 0;
+    if (cfg.headerOffsetPx != null) {
+        topOffset = Math.max(0, Number(cfg.headerOffsetPx) || 0);
+    } else {
+        if (!container) { // window
+            topOffset = getTopbarHeight({ cssVarName: _opts.cssVarName, topbarSelector: _opts.topbarSelector }) + (_opts.extraOffset ?? 12);
+        } else {
+            topOffset = 0; // 通常、内側コンテナはヘッダの下にあるため 0 で十分
+        }
+    }
+
+    const bottomGuard = Math.max(0, Math.floor((container ? container.clientHeight : window.innerHeight) * (cfg.bottomGuardRatio ?? ACTIVE_DEFAULTS.bottomGuardRatio)));
+
+    const io = new IntersectionObserver(_onIntersections, {
+        root: container || null,
+        rootMargin: `-${topOffset}px 0px -${bottomGuard}px 0px`,
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+    });
+    _active.observer = io;
+
+    _active.sections.forEach(sec => io.observe(sec));
+
+    _rafOnce('active@init', () => {
+        _onIntersections(_active.sections.map(sec => ({
+            target: sec,
+            isIntersecting: true,
+            intersectionRatio: 0
+        })));
+        _scrollIfHashPresent();
+    });
+}
+
+function _destroySectionActiveLinks() {
+    if (!_active.enabled) return;
+    _active.observer?.disconnect();
+    _active.observer = null;
+    _active.sections = [];
+    _active.ratios.clear();
+    if (_active.currentId) _updateActiveLinks(null);
+    _active.idToLinks.clear();
+    _active.currentId = null;
+    _active.enabled = false;
 }
 
 /* ------------------------------
@@ -212,6 +415,8 @@ export function initAnchorOffsetScroll(options = {}) {
     if (_inited) return;
     _inited = true;
 
+    const { activeLink: userActive = undefined, ...rest } = options;
+
     _opts = {
         cssVarName: '--topbar-h',
         topbarSelector: '.sr-topbar, .topbar',
@@ -219,24 +424,33 @@ export function initAnchorOffsetScroll(options = {}) {
         smooth: true,
         retryDelays: [0, 16, 180],
         respectScrollMargin: true,
-        ...options,
+        scrollContainer: 'window',
+        ...rest,
+        activeLink: { ...ACTIVE_DEFAULTS, ...(userActive || {}) },
     };
 
     _handlers.click = handleAnchorClick;
     _handlers.load = _scrollIfHashPresent;
     _handlers.hashchange = handleHashChange;
+    _handlers.pageshow = (e) => { if (e.persisted) _scrollIfHashPresent(); };
 
     document.addEventListener('click', _handlers.click, false);
     window.addEventListener('load', _handlers.load, false);
     window.addEventListener('hashchange', _handlers.hashchange, false);
+    window.addEventListener('pageshow', _handlers.pageshow, false);
+
+    _initSectionActiveLinks();
 }
 
 export function destroyAnchorOffsetScroll() {
     if (!_inited) return;
+    _destroySectionActiveLinks();
+
     document.removeEventListener('click', _handlers.click, false);
     window.removeEventListener('load', _handlers.load, false);
     window.removeEventListener('hashchange', _handlers.hashchange, false);
-    _handlers.click = _handlers.load = _handlers.hashchange = null;
+    window.removeEventListener('pageshow', _handlers.pageshow, false);
+    _handlers.click = _handlers.load = _handlers.hashchange = _handlers.pageshow = null;
     _opts = null;
     _inited = false;
 }

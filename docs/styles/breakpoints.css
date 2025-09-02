@@ -1,0 +1,252 @@
+/*=============== BREAKPOINTS ===============*/
+/* For small devices */
+@media screen and (max-width: 320px) {
+    .container {
+        margin-inline: 1rem;
+    }
+
+    .blob,
+    .home__image .blob-animate {
+        width: 220px;
+        height: 220px;
+    }
+
+    .features__card {
+        padding-inline: 1rem;
+    }
+
+    .approach__frame {
+        max-width: 200px;
+        border-radius: .75rem;
+    }
+
+    .approach__scroll {
+        padding: 14px;
+        max-height: calc(50vh - var(--header-height) - 3rem);
+        line-height: 1.8;
+        scroll-padding-top: var(--sr-anchor-offset);
+    }
+}
+
+
+/* For medium devices */
+@media screen and (min-width: 540px) {
+    .home__container {
+        width: 460px;
+        margin-inline: auto;
+    }
+
+    :is(.features) .section__title {
+        text-align: center;
+        margin-left: 0;
+    }
+
+    .features__card {
+        width: 350px;
+    }
+
+    .faq__container {
+        width: 550px;
+        padding: 2.5rem;
+        justify-self: center;
+        border-radius: .75rem;
+    }
+
+    .faq__header {
+        padding: 1.5rem;
+    }
+
+    .faq__title {
+        padding-right: 3.5rem;
+    }
+
+    .faq__description {
+        padding: 0 4rem 1.25rem 3.5rem;
+    }
+
+    .approach__frame {
+        max-width: 720px;
+    }
+
+    .approach__scroll {
+        padding: clamp(18px, 4vw, 24px);
+        max-width: 70ch;
+        scroll-padding-top: var(--sr-anchor-offset);
+    }
+
+    .approach__actions {
+        max-width: 720px;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .home__container {
+        width: 600px;
+    }
+
+    .faq__container {
+        width: 700px;
+        padding: 2.5rem;
+        justify-self: center;
+        border-radius: .75rem;
+    }
+
+    .approach__frame {
+        max-width: 880px;
+        border-radius: 1rem;
+    }
+
+    .approach__scroll {
+        max-height: calc(50vh - var(--header-height) - 3rem);
+        padding: clamp(20px, 3.2vw, 28px);
+        max-width: 72ch;
+        scroll-padding-top: var(--sr-anchor-offset);
+    }
+
+    .approach__actions {
+        max-width: 880px;
+    }
+}
+
+/* For large devices */
+@media screen and (min-width: 1150px) {
+    .container {
+        margin-inline: auto;
+    }
+
+    .nav {
+        height: calc(var(--header-height) + 2rem);
+        align-items: center;
+    }
+
+    .nav__logo {
+        align-self: initial;
+    }
+
+    .nav__list {
+        flex-direction: row;
+        column-gap: 5.5rem;
+    }
+
+    .home__container {
+        width: initial;
+        padding-top: 3rem;
+    }
+
+    .home__logo {
+        width: 600px;
+    }
+
+    .home__image .blob-animate {
+        width: 450px;
+        height: 450px;
+        bottom: 2rem;
+        filter: blur(50px);
+    }
+
+    .home__shadow {
+        width: 700px;
+        height: 700px;
+        left: 0;
+        right: 0;
+        margin-inline: auto;
+        background: linear-gradient(180deg, hsla(240, 100%, 2%, 0) 60%, hsl(240, 100%, 2%) 95%);
+    }
+
+    .home__data {
+        position: absolute;
+        top: 12rem;
+        left: 3rem;
+        z-index: 2;
+    }
+
+    .home__feature {
+        top: 12rem;
+        right: 1rem;
+        bottom: initial;
+    }
+
+    .feature__kicker {
+        font-size: var(--h2-font-size);
+    }
+
+    .feature__title-1 {
+        font-size: var(--biggest-font-size);
+        text-align: initial;
+    }
+
+    .feature__title-2 {
+        font-size: var(--biggest-font-size);
+        transform: translateY(-1.5rem);
+    }
+
+    .home__social {
+        bottom: 3rem;
+        row-gap: 1.5rem;
+    }
+
+    .home__social-link {
+        font-size: 1.5rem;
+    }
+
+    .home__exe {
+        font-size: var(--normal-font-size);
+        rotate: 0deg;
+        right: 0;
+    }
+
+    .features {
+        padding-block: 9rem 4rem;
+    }
+
+    .features__swiper {
+        padding-bottom: 4rem;
+    }
+
+    .features__container {
+        max-width: 1380px;
+    }
+
+    .features__card {
+        width: 440px;
+        padding: 2.5rem;
+        border-radius: 4rem;
+    }
+
+    .features__subtitle,
+    .features__description {
+        font-size: var(--normal-font-size);
+    }
+
+    .features__img {
+        border-radius: 2rem;
+    }
+
+    .features__button {
+        top: 1.5rem;
+        right: 1.5rem;
+    }
+
+    .faq__container {
+        width: 1000px;
+        padding: 2.5rem;
+        justify-self: center;
+        border-radius: .75rem;
+    }
+
+    .approach__frame {
+        max-width: 990px;
+        border-radius: 1.25rem;
+    }
+
+    .approach__scroll {
+        max-height: calc(50vh - var(--header-height));
+        padding: clamp(22px, 2vw, 32px);
+        max-width: 74ch;
+        scroll-padding-top: var(--sr-anchor-offset);
+    }
+
+    .approach__actions {
+        max-width: 1120px;
+    }
+}

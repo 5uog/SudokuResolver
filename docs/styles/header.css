@@ -1,0 +1,76 @@
+/*=============== HEADER & NAV ===============*/
+.header {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background: linear-gradient(180deg, var(--body-color)60%, hsla(240, 100%, 2%, 0) 100%);
+    z-index: var(--z-fixed);
+}
+
+.header .blob-animate {
+    top: -3rem;
+    left: -3rem;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    padding-block: 1rem;
+}
+
+.nav__logo {
+    font-family: var(--second-font);
+    font-weight: var(--font-semi-bold);
+    color: var(--title-color);
+    align-self: flex-start;
+    transition: color .4s;
+}
+
+.nav__logo:hover {
+    color: var(--first-color);
+}
+
+.nav__list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    row-gap: .5rem;
+}
+
+.nav__link {
+    color: var(--title-color);
+    font: var(--font-semi-bold) var(--small-font-size) var(--second-font);
+    transition: color .4s, text-shadow .4s;
+}
+
+.nav__link:hover {
+    color: var(--first-color);
+    text-shadow: 0 8px 16px var(--first-color);
+}
+
+/* Active link */
+.active-link {
+    color: var(--first-color);
+    text-shadow: 0 8px 16px var(--first-color);
+}
+
+a.active-link:any-link {
+  color: var(--first-color) !important;
+  text-shadow: 0 8px 16px color-mix(in oklab, var(--first-color) 35%, transparent) !important;
+}
+a.active-link:any-link:visited {
+  color: var(--first-color) !important; /* visited で地味色に落ちるのを防ぐ */
+}
+a.active-link:any-link * {
+  color: inherit !important;            /* 中の <span>, <code> 等を親色に揃える */
+}
+
+/* 非リンク要素（span/div等）として使う場合 */
+.active-link {
+  color: var(--first-color) !important;
+  text-shadow: 0 8px 16px color-mix(in oklab, var(--first-color) 35%, transparent) !important;
+}
+.active-link * {
+  color: inherit !important;
+}

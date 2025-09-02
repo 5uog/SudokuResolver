@@ -1,0 +1,23 @@
+/*=============== BUTTON ===============*/
+.button {
+    background-color: var(--body-color);
+    border: 3px solid var(--first-color);
+    color: var(--title-color);
+    padding: 1rem 2rem;
+    box-shadow: 0 8px 32px hsla(var(--hue), 60%, 64%, .5), inset 8px -8px 30px var(--first-color-alt-2);
+    border-radius: 4rem;
+    font-family: var(--second-font);
+    font-weight: var(--font-semi-bold);
+    align-items: center;
+    column-gap: .5rem;
+    transition: box-shadow .4s;
+}
+
+.button i {
+    font-weight: initial;
+    font-size: 1rem;
+}
+
+.button:hover {
+    box-shadow: 0 8px 48px hsla(var(--hue), 60%, 64%, .7), inset 8px -8px 30px var(--first-color-alt-2);
+}

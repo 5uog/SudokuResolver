@@ -1,0 +1,25 @@
+/*=============== FOOTER ===============*/
+.footer {
+    position: relative;
+    padding-block: 4rem 2rem;
+    text-align: center;
+    row-gap: 1rem;
+    overflow: hidden;
+}
+
+.footer .blob-animate {
+    right: -3rem;
+    bottom: -3rem;
+}
+
+.footer__copy {
+    color: var(--title-color);
+}
+
+.footer__copy span {
+    color: var(--first-color);
+}
+
+.footer__year {
+    font-family: var(--second-font);
+}

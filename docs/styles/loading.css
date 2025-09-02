@@ -1,0 +1,118 @@
+/* ===========================
+   Loading Overlay (fixed full)
+   =========================== */
+
+:root {
+    --ld-bg: color-mix(in oklab, #0b0e13 92%, transparent);
+    --ld-fg: #eaeef2;
+    --ld-z: 9999;
+    --ld-dur: 360ms;
+    --ld-ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+.sr-loading {
+    position: fixed;
+    inset: 0;
+    z-index: var(--ld-z);
+    display: grid;
+    place-items: center;
+    background: var(--ld-bg);
+    color: var(--ld-fg);
+    opacity: 0;
+    /* ← 本体は透明だけ。縮小しない */
+    transition: opacity var(--ld-dur) var(--ld-ease);
+    overflow: hidden;
+    /* 自身にスクロールバーを出さない */
+    overscroll-behavior: contain;
+    /* スクロール連鎖防止 */
+    min-height: 100dvh;
+    /* モバイルUI変動対策 */
+    isolation: isolate;
+    /* スタッキング安定 */
+}
+
+/* 導入フェードイン */
+.sr-loading.is-entered {
+    opacity: 1;
+}
+
+/* フェードアウト開始 */
+.sr-loading.is-leaving {
+    opacity: 0;
+}
+
+.sr-loading__inner {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    padding: 24px 28px;
+    border-radius: 16px;
+    backdrop-filter: blur(4px);
+
+    /* 縮小アニメは内側で行う */
+    transform: scale(0.985);
+    transition: transform var(--ld-dur) var(--ld-ease);
+}
+
+/* is-entered で内側を等倍に */
+.sr-loading.is-entered .sr-loading__inner {
+    transform: none;
+}
+
+/* フェードアウト時の微拡大 */
+.sr-loading.is-leaving .sr-loading__inner {
+    transform: scale(1.01);
+}
+
+.sr-loading__label {
+    font: 500 14px/1.3 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    letter-spacing: .02em;
+}
+
+/* spinner */
+.sr-loading__spinner {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2.5px solid currentColor;
+    border-right-color: transparent;
+    animation: srSpin 900ms linear infinite;
+}
+
+@keyframes srSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 本体スクロールを抑止（右のスクロールバーを消す） */
+body.has-loading {
+    overflow: hidden !important;
+}
+
+/* reduce-motion の配慮 */
+@media (prefers-reduced-motion: reduce) {
+    .sr-loading {
+        transition: none;
+    }
+
+    .sr-loading__inner {
+        transform: none !important;
+        transition: none !important;
+    }
+
+    .sr-loading__spinner {
+        animation: none;
+    }
+}
+
+/* color-mix 非対応ブラウザのフォールバック */
+.sr-loading {
+    background: #0b0e13;
+}
+
+@supports (background: color-mix(in oklab, #0b0e13 92%, transparent)) {
+    .sr-loading {
+        background: color-mix(in oklab, #0b0e13 92%, transparent);
+    }
+}

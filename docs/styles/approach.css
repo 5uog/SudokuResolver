@@ -1,0 +1,215 @@
+/*=============== APPROACH ===============*/
+.approach {
+    position: relative;
+}
+
+.approach .section__title {
+    text-align: center;
+}
+
+:root {
+    --sr-anchor-offset: calc(var(--topbar-h, var(--header-height, 56px)) + 12px);
+}
+
+.approach__frame {
+    max-width: min(1120px, 92vw);
+    margin-inline: auto;
+    margin-top: 1rem;
+    border: 1px solid color-mix(in oklab, var(--container-color) 70%, #fff 6%);
+    background: color-mix(in oklab, var(--container-color) 92%, #fff 4%);
+    border-radius: 1rem;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, .25);
+    overflow: hidden;
+}
+
+.approach__frame:focus-within {
+    outline: 2px solid color-mix(in oklab, var(--first-color) 70%, #fff 10%);
+    outline-offset: 0;
+}
+
+.approach__scroll {
+    max-height: calc(50vh - var(--header-height) - 6.5rem);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    max-width: 72ch;
+    margin-inline: auto;
+    padding: clamp(16px, 4vw, 28px);
+    line-height: 1.85;
+    font-size: clamp(var(--normal-font-size), 0.95rem + 0.2vw, 1.05rem);
+    scroll-behavior: smooth;
+    scroll-padding-top: var(--sr-anchor-offset);
+    contain: layout paint style;
+}
+
+.approach__scroll:focus {
+    outline: none;
+}
+
+.approach__scroll :is(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--second-font);
+    color: var(--title-color);
+    line-height: 1.35;
+    margin-top: 1.75em;
+    margin-bottom: .6em;
+}
+
+.approach__scroll h1 {
+    font-size: clamp(1.6rem, 1.2rem + 1.2vw, 2rem);
+}
+
+.approach__scroll h2 {
+    font-size: clamp(1.35rem, 1.05rem + 0.9vw, 1.6rem);
+}
+
+.approach__scroll h3 {
+    font-size: clamp(1.15rem, 0.95rem + 0.5vw, 1.3rem);
+}
+
+.approach__scroll p,
+.approach__scroll li {
+    color: var(--text-color);
+}
+
+.approach__toc-inline {
+    margin: 1.25rem 0 1.5rem;
+    padding: .9rem 1rem;
+    border: 1px solid color-mix(in oklab, var(--container-color) 65%, #fff 10%);
+    background: color-mix(in oklab, var(--container-color) 96%, #fff 3%);
+    border-radius: .75rem;
+}
+
+.approach__toc-title {
+    margin: 0 0 .4rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--title-color);
+    opacity: .9;
+}
+
+.approach__toc-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    columns: 1;
+    column-gap: 1.25rem;
+}
+
+.approach__toc-list li {
+    break-inside: avoid;
+}
+
+.approach__toc-list a {
+    display: block;
+    padding: .28rem .35rem;
+    border-radius: .4rem;
+    color: var(--title-color);
+    text-decoration: none;
+    text-underline-offset: .18em;
+}
+
+.approach__toc-list a:hover {
+    background: color-mix(in oklab, var(--container-color) 88%, #fff 6%);
+}
+
+.approach__toc-list a:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--first-color) 70%, #fff 10%);
+    outline-offset: 1px;
+}
+
+.approach__toc-list a.is-active {
+    background: color-mix(in oklab, var(--first-color) 12%, #fff 0%);
+    color: color-mix(in oklab, var(--first-color) 65%, var(--title-color) 40%);
+}
+
+.approach__scroll [id] {
+    scroll-margin-top: var(--sr-anchor-offset);
+}
+
+@supports not (scroll-margin-top: 1px) {
+
+    .approach__scroll :is(h1, h2, h3, h4, h5, h6)[id]:target::before,
+    .approach__scroll [id]:target::before {
+        content: "";
+        display: block;
+        height: var(--sr-anchor-offset);
+        margin-top: calc(-1 * var(--sr-anchor-offset));
+        visibility: hidden;
+    }
+}
+
+.approach__scroll code,
+.approach__scroll kbd {
+    background: color-mix(in oklab, var(--container-color) 80%, #fff 8%);
+    border: 1px solid color-mix(in oklab, var(--container-color) 70%, #fff 12%);
+    padding: .1em .35em;
+    border-radius: .4em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: .95em;
+}
+
+.approach__scroll pre code {
+    display: block;
+    padding: 1rem;
+    border-radius: .75rem;
+    overflow: auto;
+}
+
+.approach__scroll a {
+    color: var(--first-color);
+    text-underline-offset: .2em;
+}
+
+.approach__scroll a:visited {
+    color: color-mix(in oklab, var(--first-color) 78%, var(--title-color) 22%);
+}
+
+.approach__scroll a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: .06em;
+}
+
+.approach__scroll hr {
+    border: none;
+    height: 1px;
+    background: color-mix(in oklab, var(--container-color) 55%, #fff 18%);
+    margin: 1.6rem 0;
+}
+
+.approach__actions {
+    max-width: min(1120px, 92vw);
+    margin: .75rem auto 0;
+    display: flex;
+    gap: .75rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.approach__scroll .katex-display {
+    margin: 1.1rem 0;
+}
+
+.approach__scroll .katex {
+    font-size: 1em;
+}
+
+@media print {
+    .approach__frame {
+        max-width: none;
+        border: none;
+        box-shadow: none;
+        background: #fff;
+    }
+
+    .approach__scroll {
+        max-height: none;
+        overflow: visible;
+        padding: 0;
+        color: #000;
+        scroll-behavior: auto;
+    }
+
+    .approach__toc-inline {
+        break-inside: avoid;
+    }
+}

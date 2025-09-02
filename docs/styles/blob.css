@@ -1,0 +1,33 @@
+/*=============== BLOB ===============*/
+/* Blob animate */
+.blob-animate {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(180deg, var(--first-color-alt) 20%, var(--first-color-light) 100%);
+    border-radius: 50%;
+    position: absolute;
+    filter: blur(35px);
+    z-index: -1;
+    animation: animateBlob 5s linear infinite;
+}
+
+@keyframes animateBlob {
+    0% {
+        transform: rotate(0);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Blob */
+.blob {
+    width: 250px;
+    height: 250px;
+    background: linear-gradient(180deg, var(--first-color) 0%, var(--first-color-alt) 100%);
+    border-radius: 50%;
+    filter: blur(50px);
+    position: absolute;
+    z-index: -1;
+}
