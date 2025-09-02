@@ -77,3 +77,11 @@ img {
 .main {
     overflow: hidden;
 }
+
+.icon {
+    display: inline-block;
+    vertical-align: -0.2em;
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+}
