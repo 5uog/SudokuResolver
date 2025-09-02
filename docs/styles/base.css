@@ -34,10 +34,23 @@ button {
 h1,
 h2,
 h3,
-h4 {
+h4,
+.display,
+.nav__logo {
     color: var(--title-color);
     font-family: var(--second-font);
-    font-weight: var(--font-semi-bold);
+    font-weight: 700;
+}
+
+:lang(en) {
+    font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+:lang(en) h1,
+:lang(en) h2,
+:lang(en) .display {
+    font-family: "Unbounded", "Montserrat", sans-serif;
+    font-weight: 700;
 }
 
 ul {
@@ -72,7 +85,7 @@ img {
 
 .section__title {
     text-align: center;
-    font-family: var(--title-font);
+    font-family: var(--second-font);
     font-size: var(--h1-font-size);
     margin-bottom: 3rem;
 }
