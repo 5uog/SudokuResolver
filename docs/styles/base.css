@@ -72,6 +72,7 @@ img {
 
 .section__title {
     text-align: center;
+    font-family: var(--title-font);
     font-size: var(--h1-font-size);
     margin-bottom: 3rem;
 }
