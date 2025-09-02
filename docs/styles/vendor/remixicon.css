@@ -10,15 +10,9 @@
 */
 @font-face {
   font-family: "remixicon";
-  src:
-    /* 1) 兄弟相対（開発 & 本番で最優先） */
-    url("../../assets/fonts/remixicon.woff2") format("woff2"),
-    url("../../assets/fonts/remixicon.woff") format("woff"),
-    /* 2) 本番の絶対（GitHub Pages: /リポジトリ名/ 配下。保険） */
-    url("/SudokuResolver/assets/fonts/remixicon.woff2") format("woff2"),
-    url("/SudokuResolver/assets/fonts/remixicon.woff") format("woff");
-  font-style: normal;
-  font-weight: 400;
+  src: url("../../assets/fonts/remixicon.woff2?t=1734404658139") format("woff2"),
+       url("../../assets/fonts/remixicon.woff?t=1734404658139") format("woff"),
+       url("../../assets/fonts/remixicon.ttf?t=1734404658139") format("truetype");
   font-display: swap;
 }
 
