@@ -1,6 +1,4 @@
 /*=============== TOKENS ===============*/
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900&display=swap");
-
 :root {
     --header-height: 3.5rem;
 
@@ -15,8 +13,8 @@
     --body-color: hsl(240, 100%, 2%);
     --container-color: hsl(240, 8%, 6%);
 
-    --body-font: "Montserrat", sans-serif;
-    --second-font: "Unbounded", sans-serif;
+    --body-font: "Montserrat", "Noto Sans JP", system-ui, -apple-system, "Segoe UI", "Yu Gothic UI", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    --second-font: "Unbounded", "Noto Sans JP", system-ui, -apple-system, sans-serif;
     --biggest-font-size: 2rem;
     --bigger-font-size: 1.75rem;
     --h1-font-size: 1.5rem;
