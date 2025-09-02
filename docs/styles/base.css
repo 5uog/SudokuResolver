@@ -10,9 +10,15 @@ html {
 }
 
 body,
-button {
+button,
+input,
+select,
+textarea {
     font-family: var(--body-font);
     font-size: var(--normal-font-size);
+    font-weight: var(--font-regular);
+    font-synthesis-weight: none;
+    -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -76,12 +82,4 @@ img {
 
 .main {
     overflow: hidden;
-}
-
-.icon {
-    display: inline-block;
-    vertical-align: -0.2em;
-    width: 1em;
-    height: 1em;
-    fill: currentColor;
 }

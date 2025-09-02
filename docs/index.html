@@ -8,18 +8,17 @@
     <meta name="color-scheme" content="light dark">
     <meta name="description" content="数独を有限領域制約充足問題 (CSP) として厳密に定式化し、推論・探索・可視化までを統合的に論じるドキュメント。">
     <link rel="canonical" href="https://5uog.github.io/SudokuResolver/">
+    <meta name="theme-color" content="#0b0e14" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 
+    <!-- ========= bfcache / スクロール復元の早期無効化 ========= -->
     <script>
-        // できるだけ早期に、ブラウザの自動スクロール復元を無効化
         (function () {
-            if ('scrollRestoration' in history) {
-                history.scrollRestoration = 'manual';
-            }
-            // bfcache 復帰でも必ずトップへ（hash 直リンク時は hashless-anchors 側が処理）
-            window.addEventListener('pageshow', function (ev) {
+            if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+            addEventListener('pageshow', function (ev) {
                 if (ev.persisted && !location.hash) {
                     requestAnimationFrame(function () {
-                        window.scrollTo(0, 0);
+                        scrollTo(0, 0);
                         document.querySelectorAll('.approach__scroll').forEach(el => el.scrollTop = 0);
                     });
                 }
@@ -27,7 +26,7 @@
         })();
     </script>
 
-    <!--=============== no-js → js 早期置換 ===============-->
+    <!-- ========= no-js → js を最優先で明示 ========= -->
     <script>
         (function () {
             var doc = document.documentElement;
@@ -36,54 +35,76 @@
         })();
     </script>
     <style>
-        .requires-js { display: none; }
-        .js .requires-js { display: block; }
-        .nojs-warning { display: none; }
-        .no-js .nojs-warning { display: block; }
-        .nojs-banner { position: fixed; inset: 0; display: grid; place-items: center; background: #0f1217; color: #eaeef2; padding: 24px; z-index: 99999; }
-        .nojs-card { max-width: 720px; width: min(92vw, 720px); background: #1b1f27; border: 1px solid #2a2f3a; border-radius: 16px; padding: 24px 20px; box-shadow: 0 16px 48px rgba(0, 0, 0, .35); line-height: 1.6; }
-        .nojs-card h1 { margin: 0 0 .4em; font-size: 1.25rem; }
-        .nojs-actions { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
-        .btn { appearance: none; border: 1px solid #3a4250; background: #0b5fff; color: #fff; padding: 10px 14px; border-radius: 10px; text-decoration: none; font-weight: 600; }
-        .btn.secondary { background: transparent; color: #eaeef2; }
+        .requires-js{display:none}.js .requires-js{display:block}
+        .nojs-warning{display:none}.no-js .nojs-warning{display:block}
+        .nojs-banner{position:fixed;inset:0;display:grid;place-items:center;background:#0f1217;color:#eaeef2;padding:24px;z-index:99999}
+        .nojs-card{max-width:720px;width:min(92vw,720px);background:#1b1f27;border:1px solid #2a2f3a;border-radius:16px;padding:24px 20px;box-shadow:0 16px 48px rgba(0,0,0,.35);line-height:1.6}
+        .nojs-card h1{margin:0 0 .4em;font-size:1.25rem}
+        .nojs-actions{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+        .btn{appearance:none;border:1px solid #3a4250;background:#0b5fff;color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:600}
+        .btn.secondary{background:transparent;color:#eaeef2}
     </style>
 
-    <!--=============== Loading Boot (paint-before) ===============-->
-    <link rel="stylesheet" href="./styles/loading.css">
+    <!-- ========= フォント（先に preconnect） ========= -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 
+    <!-- ========= テーマを CSS 前に即時適用（FOUC防止） ========= -->
     <script>
         (function () {
-            var doc = document.documentElement;
-            doc.classList.add('boot-loading');
+            try {
+                var key='sudoku:theme';
+                var saved=localStorage.getItem(key);
+                var prefersDark=matchMedia('(prefers-color-scheme: dark)').matches;
+                var theme=(saved==='light'||saved==='dark')?saved:(prefersDark?'dark':'light');
+                if (theme==='light') document.documentElement.setAttribute('data-theme','light');
+                else document.documentElement.setAttribute('data-theme','dark');
+            } catch(e){}
+        })();
+    </script>
 
+    <!-- ========= hue アニメ有効/無効の軽量判定 ========= -->
+    <script>
+        (function () {
+            var doc=document.documentElement;
+            var isMobile=matchMedia('(pointer:coarse)').matches;
+            var reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+            doc.setAttribute('data-hue-animate', (!isMobile && !reduced) ? 'on' : 'off');
+        })();
+    </script>
+
+    <!-- ========= Loading Boot（早期ペイント） ========= -->
+    <link rel="stylesheet" href="./styles/loading.css">
+    <script>
+        (function () {
+            var doc=document.documentElement;
+            doc.classList.add('boot-loading');
+            // 早期に DOM へ挿入（document.write は <head> 実行時のみ使用）
             document.write(
-                '<div id="sr-loading" class="sr-loading sr-loading--boot" role="status" aria-live="polite">' +
-                '<div class="sr-loading__inner">' +
-                    '<div class="sr-loading__spinner" aria-hidden="true"></div>' +
-                    '<p class="sr-loading__label">Loading…</p>' +
-                '</div>' +
+                '<div id="sr-loading" class="sr-loading sr-loading--boot" role="status" aria-live="polite">'+
+                '<div class="sr-loading__inner">'+
+                    '<div class="sr-loading__spinner" aria-hidden="true"></div>'+
+                    '<p class="sr-loading__label">Loading…</p>'+
+                '</div>'+
                 '</div>'
             );
-
             requestAnimationFrame(function () {
-                var el = document.getElementById('sr-loading');
+                var el=document.getElementById('sr-loading');
                 if (el) el.classList.add('is-entered');
             });
         })();
     </script>
     <style>
-        .sr-loading{position:fixed;inset:0;display:grid;place-items:center;overflow:hidden;z-index:9999;
-                    background:var(--sr-loading-bg,#0b0e14);color:#fff;opacity:1}
-        .sr-loading__spinner{width:44px;height:44px;border-radius:50%;
-                            border:4px solid rgba(255,255,255,.25);border-top-color:#fff;
-                            animation:srspin 1s linear infinite}
+        .sr-loading{position:fixed;inset:0;display:grid;place-items:center;overflow:hidden;z-index:9999;background:var(--sr-loading-bg,#0b0e14);color:#fff;opacity:1}
+        .sr-loading__spinner{width:44px;height:44px;border-radius:50%;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;animation:srspin 1s linear infinite}
         .sr-loading__label{margin-top:12px;font:600 14px/1.2 system-ui,Segoe UI,Roboto,Helvetica,Arial}
         @keyframes srspin{to{transform:rotate(360deg)}}
         .sr-loading.is-leaving{transition:opacity .28s ease;opacity:0}
-        html.boot-loading, body.has-loading{overflow:hidden}
+        html.boot-loading,body.has-loading{overflow:hidden}
     </style>
 
-    <!--=============== OGP / TWITTER ===============-->
+    <!-- ========= OGP / Twitter ========= -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="SudokuResolver Docs">
     <meta property="og:description" content="数独をCSPとして論じ、数理的基盤から実装・可視化までを解説する。">
@@ -94,15 +115,10 @@
     <meta property="og:locale" content="ja_JP">
     <meta name="twitter:card" content="summary">
 
-    <!--=============== FONTS ===============-->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <!--=============== SWIPER CSS ===============-->
+    <!-- ========= ライブラリ CSS ========= -->
     <link rel="stylesheet" href="./styles/modules/swiper-bundle.min.css">
 
-    <!--=============== DESIGN TOKEN AND BASE ===============-->
+    <!-- ========= デザイン基盤 ========= -->
     <link rel="stylesheet" href="./styles/tokens.css">
     <link rel="stylesheet" href="./styles/base.css">
     <link rel="stylesheet" href="./styles/blob.css">
@@ -116,42 +132,34 @@
     <link rel="stylesheet" href="./styles/scrollbar.css">
     <link rel="stylesheet" href="./styles/breakpoints.css">
 
-    <!--=============== KATEX BASE CSS ===============-->
+    <!-- ========= KaTeX ========= -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="./styles/math.css">
 
-    <!--=============== PRINTS ===============-->
+    <!-- ========= 印刷 ========= -->
     <link rel="stylesheet" href="./styles/print.css" media="print">
 
-    <!--=============== KATEX CORE + AUTO RENDER ===============-->
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
-    
-    <!--=============== SITE SCRIPTS (ALL FEATURES INIT) ===============-->
+    <!-- ========= JS（依存順：グローバル → ESM） ========= -->
+    <!-- Ionicons: CDN 依存（ESM/nomodule） -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    <!-- ライブラリ（グローバル） -->
     <script src="./js/animations/modules/scrollreveal.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/animejs/lib/anime.iife.min.js" defer></script>
     <script src="./js/animations/modules/swiper-bundle.min.js" defer></script>
-    <script type="module" src="./js/index.js" defer></script>
 
-    <!--=============== FAVICON + MANIFEST ===============-->
+    <!-- KaTeX（本体→auto-render の順） -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+
+    <!-- アプリ本体（ESM。module は既定で defer 相当） -->
+    <script type="module" src="./js/index.js"></script>
+
+    <!-- ========= Favicon / PWA ========= -->
     <link rel="icon" href="./assets/favicon.ico">
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
     <link rel="manifest" href="./assets/site.webmanifest">
-
-    <script>
-        (function () {
-            try {
-                var key = 'sudoku:theme';
-                var saved = localStorage.getItem(key);
-                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                var theme = (saved === 'light' || saved === 'dark') ? saved : (prefersDark ? 'dark' : 'light');
-                if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
-                else if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-            } catch (e) { }
-        })();
-    </script>
 </head>
 
 <body>

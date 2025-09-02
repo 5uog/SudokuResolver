@@ -51,7 +51,18 @@
 }
 
 :root[data-hue-animate="on"] {
-    animation: hue-cycle 15s linear infinite;
+    animation: hue-cycle 60s linear infinite;
+}
+
+@media (pointer: coarse),
+(prefers-reduced-motion: reduce) {
+    :root[data-hue-animate="on"] {
+        animation: none !important;
+    }
+}
+
+:root[data-hue-animate="on"].hue-throttled {
+    animation: hue-cycle 60s steps(60, end) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

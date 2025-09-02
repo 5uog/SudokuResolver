@@ -66,14 +66,15 @@ export function renderNavbar(active = '') {
             <div class="blob-animate"></div>
 
             <nav class="nav container" aria-label="メインナビゲーション">
-                <a href="${home('top')}" class="nav__logo">数独Resolver</a>
+                <a href="${home('top')}" class="nav__logo">
+                    <img src="./assets/logos/logo.png" alt="" class="nav__logo-img" />
+                    <span>数独Resolver</span>
+                </a>
                 <div class="nav__menu">
                     <ul class="nav__list">
                         <li><a href="${home('features')}"${isActive('features')}>特徴</a></li>
                         <li><a href="${home('faq')}"${isActive('faq')}>よくあるご質問</a></li>
                         <li><a href="${home('approach')}"${isActive('approach')}>研究路線</a></li>
-                        <!-- 別ページ化するなら:
-                             <li><a href="${path('math/approach.html')}"${isActive('approach')}>研究路線</a></li> -->
                     </ul>
                 </div>
             </nav>
