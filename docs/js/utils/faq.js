@@ -1,6 +1,6 @@
 /* ======================================================
                    docs/js/utils/faq.js
-       FAQ アコーディオン（単一オープン・堅牢版）
+       FAQ アコーディオン（単一オープン・堅牢版/回転式）
    ====================================================== */
 
 let _inited = false;
@@ -12,6 +12,8 @@ let _inited = false;
  * @property {string}  [content='.faq__content']
  * @property {boolean} [allowMultiOpen=false]
  * @property {number}  [duration=250]
+ * @property {string}  [iconBase='add-outline'] // Ionicons: 常にこの名前を維持
+ * @property {string}  [riBase='ri-add-line']   // Remix: 常にこのクラスを維持
  */
 const DEFAULTS = Object.freeze({
     item: '.faq__item',
@@ -19,10 +21,12 @@ const DEFAULTS = Object.freeze({
     content: '.faq__content',
     allowMultiOpen: false,
     duration: 250,
+    iconBase: 'add-outline',
+    riBase: 'ri-add-line',
 });
 
 const _handlers = new WeakMap(); // item -> { click, keydown }
-const _state = new WeakMap(); // item -> { anim:false, ver:0 }
+const _state = new WeakMap();    // item -> { anim:false, ver:0 }
 
 function uid(prefix = 'faq') {
     return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
@@ -40,11 +44,9 @@ function setCollapsed(el) {
 }
 
 function expand(el) {
-    // measure
     el.style.height = 'auto';
     const target = el.scrollHeight;
     el.style.height = '0px';
-    // next frame
     requestAnimationFrame(() => {
         el.style.height = `${target}px`;
     });
@@ -58,36 +60,59 @@ function collapse(el) {
     });
 }
 
+/** header 内の .faq__icon に基底アイコンを保証（**回転だけで表現**） */
+function ensureBaseIcon(header, opts) {
+    const icon = header.querySelector('.faq__icon');
+    if (!icon) return;
+
+    // Ionicons
+    if (icon.tagName === 'ION-ICON') {
+        // name が未設定ならのみ設定（既に指定されていれば尊重）
+        if (!icon.getAttribute('name')) {
+            icon.setAttribute('name', opts.iconBase);
+        }
+        return;
+    }
+
+    // Remix Icons（後方互換）
+    const base = opts.riBase;
+    if (base) {
+        // すでに ri-* が付いているなら保持、無ければ base を付与
+        const hasRi = Array.from(icon.classList).some(c => c.startsWith('ri-'));
+        if (!hasRi) icon.classList.add(base);
+    }
+}
+
+/** アイコンの状態更新（回転式なので何もしないが、将来拡張のフックとして残す） */
+function updateIconRotationOnly(/* header, isOpen, opts */) {
+    // no-op: 親 .faq-open による CSS transform に委ねる
+}
+
 function openItem(item, opts) {
     const header = item.querySelector(opts.header);
     const content = item.querySelector(opts.content);
     if (!header || !content) return;
 
     const st = getState(item);
-    if (st.anim) return;        // アニメ中は無視
+    if (st.anim) return;
     st.anim = true;
-    st.ver++;                   // 世代を進める（以降のendで照合）
+    st.ver++;
     const myVer = st.ver;
 
     item.classList.add('faq-open');
     header.setAttribute('aria-expanded', 'true');
+    updateIconRotationOnly(header, true, opts);
 
-    // open: height -> auto へ移行（ただし世代チェック）
     const onEnd = (e) => {
         if (e.propertyName !== 'height') return;
-        // 途中で close されていたら無視
         const stNow = getState(item);
-        if (stNow.ver !== myVer || !item.classList.contains('faq-open')) {
-            content.removeEventListener('transitionend', onEnd);
-            stNow.anim = false;
-            return;
-        }
-        content.style.height = 'auto';
         content.removeEventListener('transitionend', onEnd);
+        if (stNow.ver === myVer && item.classList.contains('faq-open')) {
+            content.style.height = 'auto';
+        }
         stNow.anim = false;
     };
 
-    // reduced-motion なら即時反映
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     if (reduced) {
         content.style.transition = 'none';
@@ -106,28 +131,17 @@ function closeItem(item, opts) {
     if (!header || !content) return;
 
     const st = getState(item);
-    if (st.anim) {
-        // アニメ中でも閉じる操作は受け付けるが、新しい世代にして
-        // 既存のopen側のtransitionendを無効化する
-        st.ver++;
-    } else {
-        st.anim = true;
-        st.ver++;
-    }
+    if (st.anim) st.ver++;
+    else { st.anim = true; st.ver++; }
     const myVer = st.ver;
 
     item.classList.remove('faq-open');
     header.setAttribute('aria-expanded', 'false');
+    updateIconRotationOnly(header, false, opts);
 
     const onEnd = (e) => {
         if (e.propertyName !== 'height') return;
         const stNow = getState(item);
-        if (stNow.ver !== myVer) {
-            content.removeEventListener('transitionend', onEnd);
-            stNow.anim = false;
-            return;
-        }
-        // 閉じ終わりは 0px のまま（autoにはしない）
         content.removeEventListener('transitionend', onEnd);
         stNow.anim = false;
     };
@@ -146,15 +160,14 @@ function closeItem(item, opts) {
 
 function toggleItem(targetItem, opts, group) {
     const st = getState(targetItem);
-    if (st.anim) return; // 自分がアニメ中なら無視（連打ガード）
+    if (st.anim) return;
 
     const isOpen = targetItem.classList.contains('faq-open');
-
     if (!opts.allowMultiOpen) {
-        // 先に他を全部閉じる。開いている項目はアニメ中でも ver++ で無効化できる
-        group.forEach(it => { if (it !== targetItem && it.classList.contains('faq-open')) closeItem(it, opts); });
+        group.forEach(it => {
+            if (it !== targetItem && it.classList.contains('faq-open')) closeItem(it, opts);
+        });
     }
-
     isOpen ? closeItem(targetItem, opts) : openItem(targetItem, opts);
 }
 
@@ -170,15 +183,15 @@ export function init(options = {}) {
         let keptOne = false;
         items.forEach(item => {
             if (item.classList.contains('faq-open')) {
-                if (!keptOne) {
-                    keptOne = true;
-                } else {
+                if (!keptOne) keptOne = true;
+                else {
                     const c = item.querySelector(opts.content);
                     const h = item.querySelector(opts.header);
                     if (c && h) {
                         item.classList.remove('faq-open');
                         h.setAttribute('aria-expanded', 'false');
                         setCollapsed(c);
+                        // 回転式なのでアイコン更新は不要
                     }
                 }
             }
@@ -197,6 +210,9 @@ export function init(options = {}) {
         header.setAttribute('aria-controls', contentId);
         header.setAttribute('aria-expanded', item.classList.contains('faq-open') ? 'true' : 'false');
         if (!header.hasAttribute('tabindex')) header.tabIndex = 0;
+
+        // アイコンの基底形状を保証（以後は回転だけで表現）
+        ensureBaseIcon(header, opts);
 
         // 初期高さ
         if (item.classList.contains('faq-open')) {

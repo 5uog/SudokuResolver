@@ -29,10 +29,14 @@
 }
 
 .faq__icon {
+    display: inline-flex;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
     font-size: 1.5rem;
-    height: max-content;
     color: var(--title-color);
-    transition: .3s;
+    vertical-align: middle;
+    transition: transform .3s;
+    --ionicon-stroke-width: 48;
 }
 
 .faq__item {
@@ -57,7 +61,7 @@
 .faq__content {
     overflow: hidden;
     height: 0;
-    transition: all .25s ease;
+    transition: height .25s ease;
 }
 
 .faq-open .faq__icon {
