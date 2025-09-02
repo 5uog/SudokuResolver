@@ -10,18 +10,25 @@
 */
 @font-face {
   font-family: "remixicon";
-  src: url('../../assets/fonts/remixicon.eot?t=1734404658139'); /* IE9*/
-  src: url('../../assets/fonts/remixicon.eot?t=1734404658139#iefix') format('embedded-opentype'), /* IE6-IE8 */
-  url("../../assets/fonts/remixicon.woff2?t=1734404658139") format("woff2"),
-  url("../../assets/fonts/remixicon.woff?t=1734404658139") format("woff"),
-  url('../../assets/fonts/remixicon.ttf?t=1734404658139') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
-  url('../../assets/fonts/remixicon.svg?t=1734404658139#remixicon') format('svg'); /* iOS 4.1- */
+  src:
+    /* 1) 兄弟相対（開発 & 本番で最優先） */
+    url("../../assets/fonts/remixicon.woff2") format("woff2"),
+    url("../../assets/fonts/remixicon.woff") format("woff"),
+    /* 2) 本番の絶対（GitHub Pages: /リポジトリ名/ 配下。保険） */
+    url("/SudokuResolver/assets/fonts/remixicon.woff2") format("woff2"),
+    url("/SudokuResolver/assets/fonts/remixicon.woff") format("woff");
+  font-style: normal;
+  font-weight: 400;
   font-display: swap;
 }
 
+/* アイコン側は必ず“専用フォント”を強制 */
 [class^="ri-"], [class*=" ri-"] {
-  font-family: 'remixicon' !important;
+  font-family: "remixicon" !important;
   font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  display: inline-block;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

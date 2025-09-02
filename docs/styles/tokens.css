@@ -41,8 +41,13 @@
 }
 
 @keyframes hue-cycle {
-    0%   { --hue: 0; }
-    100% { --hue: 359.99; }
+    0% {
+        --hue: 0;
+    }
+
+    100% {
+        --hue: 359.99;
+    }
 }
 
 :root[data-hue-animate="on"] {
