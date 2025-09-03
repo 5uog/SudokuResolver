@@ -1,9 +1,10 @@
-/*=============== HEADER & NAV ===============*/
+/*=============== HEADER & NAV (hardened + unified rev3) ===============*/
+
 .header {
     position: fixed;
     inset: 0 auto auto 0;
     width: 100%;
-    background: linear-gradient(180deg, var(--body-color) 60%, hsla(240, 100%, 2%, 0) 100%);
+    background: linear-gradient(180deg, var(--body-color) 60%, hsla(240, 100%, 5%, 0) 100%);
     z-index: var(--z-fixed);
 }
 
@@ -12,70 +13,200 @@
     left: -3rem;
 }
 
-.nav {
+#sr-topbar .nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding-block: 1rem;
+    color: var(--title-color);
+    isolation: isolate;
+    position: relative;
+    z-index: calc(var(--z-fixed) + 1);
+    --hue-animate: var(--title-color);
+    -webkit-tap-highlight-color: transparent;
 }
 
-.nav__logo {
+/* =========================
+   共通トークン（発光量など）
+   ========================= */
+:root {
+    --nav-accent: var(--first-color);
+    --nav-color: var(--title-color);
+    --glow-y: 10px;
+    --glow-r: 18px;
+}
+
+@media (max-width: 640px) {
+    :root {
+        --glow-y: 6px;
+        --glow-r: 12px;
+    }
+}
+
+/* =========================
+   ロゴ（アイコン+テキスト）
+   ========================= */
+#sr-topbar .nav__logo {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: .5rem;
     font-family: var(--second-font);
     font-weight: var(--font-semi-bold);
-    color: var(--title-color);
-    transition: color 0.4s;
+    color: inherit;
+    text-decoration: none;
+    transition: color .2s ease-in-out, text-shadow .2s ease-in-out, filter .2s ease-in-out;
+    outline: none;
 }
 
-.nav__logo:hover,
-.nav__logo:focus-visible {
-    color: var(--first-color);
-}
-
-.nav__logo:hover .nav__logo-img,
-.nav__logo:focus-visible .nav__logo-img {
-    filter: drop-shadow(0 0 8px var(--first-color));
-}
-
-.nav__logo:hover {
-    color: var(--first-color);
-}
-
-.nav__logo-img {
-    width: 28px;
-    height: 28px;
+#sr-topbar .nav__logo-img {
+    --logo-size: 28px;
+    inline-size: var(--logo-size);
+    block-size: var(--logo-size);
     display: block;
+    filter: none !important;
+    mix-blend-mode: normal !important;
 }
 
-.nav__list {
+/* =========================
+   メニューリスト
+   ========================= */
+#sr-topbar .nav__list {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    row-gap: 0.5rem;
+    row-gap: .5rem;
+    color: inherit;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
-.nav__link {
-    color: var(--title-color);
-    font: var(--font-semi-bold) var(--small-font-size) var(--second-font);
-    transition: color 0.4s, text-shadow 0.4s;
+/* 「白じゃない」汚染の根を封じる（過去のvisited/装飾が強い環境対策） */
+#sr-topbar .nav__list,
+#sr-topbar .nav__list * {
+    color: var(--nav-color) !important;
+    -webkit-text-fill-color: var(--nav-color) !important;
+    text-shadow: none !important;
+    background: none !important;
+    background-clip: border-box !important;
+    mix-blend-mode: normal !important;
+    filter: none !important;
 }
 
-.nav__link:hover {
-    color: var(--first-color);
-    text-shadow: 0 8px 16px var(--first-color);
-}
-
-.nav__link.active-link {
-    color: var(--first-color) !important;
-    text-shadow: 0 8px 16px color-mix(in oklab, var(--first-color) 35%, transparent) !important;
-}
-
-.nav__link.active-link:visited {
-    color: var(--first-color) !important;
-}
-
-.nav__link.active-link * {
+/* =========================
+   ナビリンク
+   ========================= */
+#sr-topbar .nav__link {
     color: inherit !important;
+    font: var(--font-semi-bold) var(--small-font-size) var(--second-font);
+    text-decoration: none;
+    padding: .25rem .1rem;
+    border-radius: .2rem;
+    transition: color .2s ease-in-out, text-shadow .2s ease-in-out, filter .2s ease-in-out;
+    outline: none;
+}
+
+/* UAのvisitedなどを完全無効化（色を常にinheritへ） */
+#sr-topbar :where(.nav) .nav__link:link,
+#sr-topbar :where(.nav) .nav__link:visited,
+#sr-topbar :where(.nav) .nav__link:active {
+    color: inherit !important;
+}
+
+/* =========================
+   “完全統一”インタラクション
+   ロゴと各リンクを同列に扱う
+   ========================= */
+
+/* 1) 基本色（常時） */
+#sr-topbar :is(.nav__logo, .nav__link) {
+    color: var(--nav-color) !important;
+}
+
+/* 2) hover（マウス環境のみ） */
+@media (hover: hover) {
+    #sr-topbar :is(.nav__logo, .nav__link):hover {
+        color: var(--nav-accent) !important;
+    }
+}
+
+/* 3) focus-visible（キーボード操作） */
+#sr-topbar :is(.nav__logo, .nav__link):focus-visible {
+    color: var(--nav-accent) !important;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    outline: 2px solid color-mix(in oklab, var(--nav-accent) 60%, transparent);
+    outline-offset: 2px;
+}
+
+/* 4) active-link（現在地） */
+#sr-topbar .nav__link.active-link {
+    color: var(--nav-accent) !important;
+}
+
+/* 5) 発光（hover / focus-visible / active-link すべて同一表現） */
+#sr-topbar :is(.nav__logo:hover, .nav__logo:focus-visible,
+    .nav__link:hover, .nav__link:focus-visible,
+    .nav__link.active-link) {
+    text-shadow:
+        0 calc(var(--glow-y) * 0.2) calc(var(--glow-r) * 0.5) color-mix(in oklab, var(--nav-accent) 60%, transparent),
+        0 calc(var(--glow-y) * 0.6) var(--glow-r) color-mix(in oklab, var(--nav-accent) 45%, transparent),
+        0 var(--glow-y) calc(var(--glow-r) * 1.4) color-mix(in oklab, var(--nav-accent) 35%, transparent);
+}
+
+/* active + visited 競合の完全排除 */
+#sr-topbar .nav__link.active-link:visited {
+    color: var(--nav-accent) !important;
+}
+
+/* ロゴ画像の発光も“同一イベントで同一トーン”に */
+#sr-topbar :is(.nav__logo:hover, .nav__logo:focus-visible) .nav__logo-img {
+    filter: drop-shadow(0 0 6px color-mix(in oklab, var(--nav-accent) 60%, transparent));
+}
+
+/* =========================
+   アイコン（i, svg）は currentColor 追従
+   ========================= */
+#sr-topbar .nav__list i,
+#sr-topbar .nav__list svg {
+    color: currentColor !important;
+    fill: currentColor;
+    stroke: currentColor;
+    stroke-width: 0;
+    vertical-align: middle;
+}
+
+/* =========================
+   レイアウト：md+ で横並び
+   ========================= */
+@media (min-width: 768px) {
+    #sr-topbar .nav__list {
+        flex-direction: row;
+        align-items: center;
+        column-gap: 1.25rem;
+        row-gap: 0;
+    }
+}
+
+/* =========================
+   モバイル：過剰フィルタ抑制
+   ========================= */
+@media (max-width: 640px) {
+    #sr-topbar :is(.nav__logo:hover, .nav__link:hover,
+        .nav__link.active-link) {
+        filter: none !important;
+    }
+}
+
+/* =========================
+   低モーション設定
+   ========================= */
+@media (prefers-reduced-motion: reduce) {
+    #sr-topbar :is(.nav__logo, .nav__link) {
+        transition: none !important;
+        text-shadow: none !important;
+        filter: none !important;
+    }
 }

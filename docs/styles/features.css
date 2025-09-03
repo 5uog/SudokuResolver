@@ -96,6 +96,13 @@
     padding-bottom: 2rem;
 }
 
+.features__swiper .swiper-slide img {
+    width: 100%;
+    height: auto;
+    display: block;
+    aspect-ratio: 16/9;
+}
+
 .features .swiper-pagination-bullets {
     bottom: 0;
 }

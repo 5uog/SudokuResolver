@@ -18,6 +18,7 @@
 
 .faq__header {
     display: flex;
+    align-items: flex-start;
     column-gap: .5rem;
     padding: 1.25rem 1.25rem 1.25rem 1rem;
     cursor: pointer;
@@ -28,11 +29,20 @@
     font-size: var(--small-font-size);
 }
 
+/* ←ここを修正：ion-icon を絶対サイズで固定 */
+:root {
+    --faq-icon-size: 24px;
+}
+
+/* 必要ならここだけ変えれば全体反映 */
+
 .faq__icon {
     display: inline-flex;
-    inline-size: 1.5rem;
-    block-size: 1.5rem;
-    font-size: 1.5rem;
+    flex: 0 0 var(--faq-icon-size);
+    inline-size: var(--faq-icon-size);
+    block-size: var(--faq-icon-size);
+    font-size: var(--faq-icon-size);
+    line-height: 1;
     color: var(--title-color);
     vertical-align: middle;
     transition: transform .3s;

@@ -16,8 +16,10 @@
     }
 
     .approach__frame {
-        max-width: 200px;
-        border-radius: .75rem;
+        max-height: calc(58vh - var(--header-height) - 3rem);
+        padding: 14px;
+        line-height: 1.8;
+        scroll-padding-top: var(--sr-anchor-offset);
     }
 
     .approach__scroll {
@@ -97,7 +99,7 @@
     }
 
     .approach__scroll {
-        max-height: calc(50vh - var(--header-height) - 3rem);
+        max-height: calc(var(--approach-vh-md) - var(--header-height) - 2.5rem);
         padding: clamp(20px, 3.2vw, 28px);
         max-width: 72ch;
         scroll-padding-top: var(--sr-anchor-offset);
@@ -142,6 +144,14 @@
         height: 450px;
         bottom: 2rem;
         filter: blur(50px);
+    }
+
+    .home__image {
+        margin-top: 2rem;
+    }
+
+    .home__logo {
+        margin-top: 1rem;
     }
 
     .home__shadow {
@@ -240,7 +250,7 @@
     }
 
     .approach__scroll {
-        max-height: calc(50vh - var(--header-height));
+        max-height: calc(var(--approach-vh-lg) - var(--header-height));
         padding: clamp(22px, 2vw, 32px);
         max-width: 74ch;
         scroll-padding-top: var(--sr-anchor-offset);

@@ -112,9 +112,14 @@
     <link rel="stylesheet" href="./styles/scrollbar.css">
     <link rel="stylesheet" href="./styles/breakpoints.css">
 
-    <!-- ========= KaTeX ========= -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="./styles/math.css">
+    <!-- ========= KaTeX + math.css 遅延読込 ========= -->
+    <link rel="preload" href="./styles/vendor/katex.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="./styles/math.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+    <noscript>
+        <link rel="stylesheet" href="./styles/vendor/katex.min.css">
+        <link rel="stylesheet" href="./styles/math.css">
+    </noscript>
 
     <!-- ========= 印刷 ========= -->
     <link id="print-css" rel="stylesheet" href="./styles/print.css" media="print">
@@ -137,7 +142,7 @@
 
     <!-- ライブラリ（グローバル） -->
     <script src="./js/animations/modules/scrollreveal.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/animejs/lib/anime.iife.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.iife.min.js" defer></script>
     <script src="./js/animations/modules/swiper-bundle.min.js" defer></script>
 
     <!-- KaTeX（本体→auto-render の順） -->
@@ -187,7 +192,9 @@
                     </div>
                     <div class="home__image">
                         <div class="blob-animate"></div>
-                        <img src="./assets/logos/logo-300.webp" srcset="./assets/logos/logo-300.webp 300w, ./assets/logos/logo-600.webp 600w, ./assets/logos/logo-1024.webp 1024w" sizes="(max-width: 600px) 300px, 600px" alt="image" class="home__logo">
+                        <img src="./assets/logos/logo-600.webp" srcset="./assets/logos/logo-300.webp 300w, ./assets/logos/logo-600.webp 600w, ./assets/logos/logo-1024.webp 1024w"
+                            sizes="(max-width: 600px) 300px, (max-width: 1024px) 600px, 1024px" width="1024" height="1024" alt="数独Resolverのロゴ"
+                            decoding="async" fetchpriority="high" class="home__logo">
                     </div>
                     <div class="home__feature">
                         <h3 class="feature__kicker">Solve</h3>

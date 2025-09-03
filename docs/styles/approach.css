@@ -9,6 +9,9 @@
 
 :root {
     --sr-anchor-offset: calc(var(--topbar-h, var(--header-height, 56px)) + 12px);
+    --approach-vh: 62vh;
+    --approach-vh-md: 66vh;
+    --approach-vh-lg: 72vh;
 }
 
 .approach__frame {
@@ -28,7 +31,7 @@
 }
 
 .approach__scroll {
-    max-height: calc(50vh - var(--header-height) - 6.5rem);
+    max-height: calc(var(--approach-vh) - var(--header-height) - 3rem);
     overflow: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;

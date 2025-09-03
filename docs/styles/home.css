@@ -22,19 +22,20 @@
 .home__image {
     position: relative;
     display: grid;
-    overflow-y: clip;
+    margin-top: -1.5rem;
 }
 
 .home__image .blob-animate {
     width: 250px;
     height: 250px;
-    bottom: 0;
+    /* bottom: 0; */
     justify-self: center;
 }
 
 .home__logo {
     width: 320px;
     justify-self: center;
+    margin-top: -2rem;
 }
 
 .home__shadow,
@@ -47,7 +48,7 @@
 .home__shadow {
     width: 100%;
     height: 375px;
-    bottom: 1rem;
+    bottom: -2rem;
     z-index: 1;
     background: linear-gradient(180deg, hsla(240, 100%, 2%, 0) 60%, hsl(240, 100%, 2%) 95%);
 }

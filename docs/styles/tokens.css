@@ -1,21 +1,26 @@
-/*=============== TOKENS ===============*/
+/*=============== TOKENS (contrast-safe for dark) ===============*/
+
 :root {
     --header-height: 3.5rem;
 
+    /* brand */
     --hue: 0;
     --first-color: hsl(var(--hue), 60%, 64%);
     --first-color-alt: hsl(var(--hue), 80%, 56%);
     --first-color-alt-2: hsl(var(--hue), 60%, 56%) !important;
     --first-color-light: hsl(var(--hue), 60%, 74%);
-    --title-color: hsl(240, 8%, 95%);
-    --text-color: hsl(240, 8%, 70%);
-    --text-color-light: hsl(240, 8%, 50%);
-    --body-color: hsl(240, 100%, 2%);
-    --container-color: hsl(240, 8%, 6%);
 
-    --body-font: "Montserrat","Noto Sans JP",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-    --second-font: "Unbounded","Noto Sans JP",system-ui,-apple-system,sans-serif;
-    --mono-font: ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    /* >>> contrast-boosted <<< */
+    --title-color: hsl(240, 12%, 96.5%);
+    --text-color: hsl(240, 10%, 78%);
+    --text-color-light: hsl(240, 9%, 64%);
+    --body-color: hsl(240, 100%, 1.5%);
+    --container-color: hsl(240, 9%, 5%);
+
+    /* type scale */
+    --body-font: "Montserrat", "Noto Sans JP", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --second-font: "Unbounded", "Noto Sans JP", system-ui, -apple-system, sans-serif;
+    --mono-font: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
     --biggest-font-size: 2rem;
     --bigger-font-size: 1.75rem;
     --h1-font-size: 1.5rem;
@@ -31,10 +36,19 @@
 
     --z-tooltip: 10;
     --z-fixed: 100;
-
     --sr-anchor-offset: calc(var(--topbar-h, var(--header-height, 56px)) + 12px);
+
+    --glow-y: 10px;
+    --glow-r: 18px;
+    --glow-a: 0.55;
+
+    /* リンクは前景寄りの明度で確実に読める色を定義 */
+    --link-color: hsl(var(--hue), 72%, 72%);
+    --link-hover: hsl(var(--hue), 82%, 66%);
+    --link-visited: hsl(var(--hue), 62%, 64%);
 }
 
+/* hue アニメ設定（既存そのまま）*/
 @property --hue {
     syntax: '<number>';
     inherits: true;
@@ -43,11 +57,11 @@
 
 @keyframes hue-cycle {
     0% {
-        --hue: 0;
+        --hue: 0
     }
 
     100% {
-        --hue: 359.99;
+        --hue: 359.99
     }
 }
 
@@ -83,4 +97,44 @@
         --small-font-size: .875rem;
         --smaller-font-size: .813rem;
     }
+}
+
+/* ========== “落ちやすい所”の底上げ（任意だが推奨） ========== */
+
+/* リンク（十分なコントラスト） */
+a {
+    color: var(--link-color);
+}
+
+a:hover {
+    color: var(--link-hover);
+}
+
+a:visited {
+    color: var(--link-visited);
+}
+
+/* 薄色チップ/コード背景：暗い面との差を少し拡げる */
+.approach__scroll code,
+.approach__scroll kbd {
+    color: var(--title-color);
+    background: color-mix(in oklab, var(--container-color) 72%, #fff 12%);
+    border: 1px solid color-mix(in oklab, var(--container-color) 55%, #fff 18%);
+}
+
+/* キャプション/補助テキストは “light” でも4.5:1を狙う */
+.small,
+.caption,
+.muted {
+    color: var(--text-color-light);
+}
+
+/* 区切り線・ヘアライン：視認性を少し上げる */
+.hr,
+hr,
+.hairline {
+    border: 0;
+    height: 1px;
+    background: color-mix(in oklab, var(--container-color) 30%, #fff 20%);
+    opacity: .9;
 }

@@ -1,4 +1,4 @@
-// docs/js/index.js
+// ========= docs/js/index.js  (rev-anti-reflow) =========
 
 // --- Core utils ---
 import * as Theme from './utils/theme.js';
@@ -11,6 +11,7 @@ import * as Print from './utils/print.js';
 import * as FAQ from './utils/faq.js';
 import { setupApproachLazyLoad } from './utils/approach-loader.js';
 import { initHashlessAnchors } from './utils/hashless-anchors.js';
+import { optimizeFaqDom } from './utils/faq-dom-opt.js';
 
 // --- UI components ---
 import { renderNavbar } from './components/nav.js';
@@ -18,8 +19,6 @@ import { renderFooter } from './components/footer.js';
 
 /* ======================================================
  * /docs/ 基準を import.meta.url から堅牢に抽出（GH Pages / ローカル両対応）
- *  - /SudokuResolver/docs/js/index.js → /SudokuResolver/docs/
- *  - /docs/js/index.js                → /docs/
  * ====================================================== */
 function getDocsBaseDir() {
     try {
@@ -43,31 +42,31 @@ function atTopResetInnerScroll() {
 
 /** アプローチ断片（章HTML）のベースパスを推定 */
 function guessApproachBase(docsBase) {
-    // URL から推定（/docs/math/ があれば優先）
     const here = normalizePath(location.pathname);
     const mathRoot = normalizePath(docsBase + 'math/');
     const approachRoot = normalizePath(docsBase + 'approach/');
     if (here.startsWith(mathRoot)) return mathRoot;
 
-    // DOM から推定（data-srcの中にスラッシュがあればその親を推測）
     const ph = document.querySelector('.approach__scroll .approach__section[data-src]');
     if (ph) {
         const file = ph.getAttribute('data-src') || '';
-        // 断片が裸ファイル名なら既定は /docs/approach/ とする
         if (!file.includes('/')) return approachRoot;
-        // 相対的にサブフォルダが示されている場合は docsBase + そのサブフォルダ を採用…としたいが
-        // 信頼できる基準が無いので安全側に approachRoot を返す
         return approachRoot;
     }
-
-    // フォールバック
     return approachRoot;
 }
+
+// [REV] ユーティリティ：idle/rAF
+const rIC = window.requestIdleCallback || (fn => setTimeout(fn, 1));
+const nextFrame = () => new Promise(requestAnimationFrame);
+const twoFrames = async () => { await nextFrame(); await nextFrame(); };
 
 document.addEventListener('DOMContentLoaded', async () => {
     let active = '';
 
     try {
+        // [REV] 初回は読み取り/書き込みが混ざらないように、まず位置リセットだけ rAF 後に
+        await nextFrame();
         atTopResetInnerScroll();
 
         // 0) 実行環境フラグ
@@ -75,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
         const hasHoudini = typeof CSS !== 'undefined' && 'registerProperty' in CSS;
 
-        // 1) テーマ初期化
+        // 1) テーマ初期化（書き込みのみ：OK）
         Theme.init();
 
         // 1.1) グローバル色相アニメ（reduce-motion 配慮）
@@ -84,33 +83,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             document.documentElement.removeAttribute('data-hue-animate');
             if (!prefersReducedMotion) {
-                try {
-                    const { startHueCycle } = await import('./utils/hue-animate.js');
-                    startHueCycle({
-                        periodMs: 60000,
-                        min: 0,
-                        max: 360,
-                        unit: 'deg',
-                        registerProperty: true,
-                    });
-                } catch (e) {
-                    console.warn('[hue-cycle] fallback start failed:', e);
-                }
+                // [REV] hue は UI に影響薄なので idle で後ろ倒し
+                rIC(async () => {
+                    try {
+                        const { startHueCycle } = await import('./utils/hue-animate.js');
+                        startHueCycle({
+                            periodMs: 60000, min: 0, max: 360, unit: 'deg', registerProperty: true,
+                        });
+                    } catch (e) { console.warn('[hue-cycle] fallback start failed:', e); }
+                });
             } else {
-                try {
-                    const { stopHueCycle } = await import('./utils/hue-animate.js');
-                    stopHueCycle();
-                } catch { }
+                rIC(async () => {
+                    try {
+                        const { stopHueCycle } = await import('./utils/hue-animate.js');
+                        stopHueCycle();
+                    } catch { }
+                });
             }
         }
 
         // 1.2) ハッシュ無しアンカー（URLを汚さずに内外スクロールへ誘導）
-        initHashlessAnchors({
+        // [REV] スクロール関連はフォント確定後に（計測回数減）
+        const initAnchorsDeferred = () => initHashlessAnchors({
             smooth: true,
             containerSelectors: ['.approach__scroll', '.approach__frame'],
             innerOffset: 10,
             detectScrollableAncestor: true,
-            // headerOffset は CSS 変数 --header-height を自動参照
         });
 
         // 2) ルーティング判定（/docs/ 基準）
@@ -120,108 +118,124 @@ document.addEventListener('DOMContentLoaded', async () => {
         const inMath = here.startsWith(normalizePath(docsBase + 'math/'));
         active = here === docsHome ? 'home' : (inMath ? 'math' : '');
 
-        const hasInlineApproach = !!document.querySelector('.approach__scroll .approach__section[data-src]');
+        const hasInlineApproach =
+            !!document.querySelector('.approach__scroll .approach__section[data-src]');
 
-        // 3) ナビ/フッター描画（年は内部で自動最新化）
+        // 3) ナビ/フッター描画（年は内部で自動最新化） — 書き込みのみ
         renderNavbar(active);
         renderFooter();
 
+        // [REV] フォントロード完了後に“スクロール/観測”系を始めると reflow が減る
+        // さらに 1 フレーム待ちで初期レイアウトを安定させる
+        (document.fonts?.ready || Promise.resolve()).then(async () => {
+            await nextFrame();
+            initAnchorsDeferred();
+        });
+
         // 4) UI/ユーティリティ初期化
-        Topbar.init();
+        // [REV] Topbar は layout 読みを伴う可能性があるため 2フレーム後に
+        twoFrames().then(() => Topbar.init());
+
+        // [REV] Formula.init は IO ベースなら早めでもOK。念のため rAF 後に。
+        await nextFrame();
         Formula.init();
 
-        // 4.1) 可視領域検出とオフセットスクロール（クリック横取りは hashless-anchors に委譲）
+        // 4.1) アンカー・アクティブリンクはコスト高なので後ろ倒し/軽量化
+        //      -> 最初は監視オフ/簡略で立ち上げ、必要なら再設定
         const scrollEl = document.querySelector('.approach__scroll') || 'auto';
-        initAnchorOffsetScroll({
-            extraOffset: 12,
-            smooth: !prefersReducedMotion,
-            scrollContainer: scrollEl,
-            interceptClicks: false,   // ★ハイジャックしない
-            hashMode: 'ignore',       // ★URLハッシュは無視（ネイティブ挙動優先）
-            activeLink: {
-                enable: true,
-                sectionSelector: '#approach-doc h2[id], .approach__scroll h2[id], section[id]',
-                linkQuery: (id) =>
-                    `.approach__toc a[href="#${id}"], .approach__toc-inline a[href="#${id}"], .nav__menu a[href*="#${id}"]`,
-                activeClass: 'active-link',
-                setAriaCurrent: true,
-                minVisibleRatio: 0.35,
-                bottomGuardRatio: 0.45,
-            },
+        rIC(() => {
+            initAnchorOffsetScroll({
+                extraOffset: 12,
+                smooth: !prefersReducedMotion,
+                scrollContainer: scrollEl,
+                interceptClicks: false,
+                hashMode: 'ignore',
+                // [REV] まず activeLink を無効化 or 簡略化（必要時に再init）
+                activeLink: {
+                    enable: false, // ←最小構成で立ち上げ
+                    // enable: true,
+                    // sectionSelector: '#approach-doc h2[id], .approach__scroll h2[id], section[id]',
+                    // linkQuery: id => `.approach__toc a[href="#${id}"], .approach__toc-inline a[href="#${id}"], .nav__menu a[href*="#${id}"]`,
+                    // activeClass: 'active-link',
+                    // setAriaCurrent: true,
+                    // minVisibleRatio: 0.35,
+                    // bottomGuardRatio: 0.45,
+                },
+            });
         });
 
         // 4.2) 数式レンダリング・保護・印刷（初回）
-        initMathKatex();
+        // [REV] まずは軽量処理だけ。KaTeX 本格走行は idle に。
         Guards.init?.();
         Print.init?.();
 
-        // 5) FAQ
+        rIC(() => initMathKatex()); // ← idle でレンダリング
+
+        // 4.3) FAQのDOM最適化：idle（Most children/DOM depth 対策）
+        rIC(() => {
+            try { optimizeFaqDom('#faq'); } catch { }
+        });
+
+        // 5) FAQ（アコーディオン）: レイアウトに影響出にくいので rAF 後
+        await nextFrame();
         FAQ.init({ allowMultiOpen: false, duration: 250 });
 
-        // 6) Approach 章ファイルのオンデマンド読込（見えたらロード／離れたら破棄）
+        // 6) Approach 章ファイルのオンデマンド読込
         if (active === 'math' || hasInlineApproach) {
-
             setupApproachLazyLoad({
                 base: `${docsBase}math/`,
                 root: document.getElementById('approach-scroll') || document.querySelector('.approach__scroll'),
                 margin: '1200px',
-                unloadFar: false,   // ★ 安定優先（直リンク/相互参照の事故を防ぐ）
+                unloadFar: false,
                 keepAhead: 3,
                 keepBehind: 3,
-                // hijackScrolling: true, // ←どうしてもコードでスクロールしたい場面のみ有効化
             });
 
-            // 章が差し込まれたら、その章ぶんの KaTeX を増分処理（簡易：全体再実行でもOK）
+            // 章が差し込まれたら KaTeX を増分処理（idle）
             document.addEventListener(
                 'sr:approach:section:loaded',
-                () => { setTimeout(() => initMathKatex(), 0); },
+                () => rIC(() => { initMathKatex(); optimizeFaqDom('#faq'); }),
                 { passive: true }
             );
         } else {
-            // 数学ページでもプレースホルダがないケースに備えて ready を投げておく
             document.dispatchEvent(new CustomEvent('sr:approach:ready'));
         }
 
-        // 7) TOC ロジック（math 単体ページ／index 統合表示の両方で動かす）
+        // 7) TOC ロジック
         if (active === 'math' || hasInlineApproach) {
             try {
                 const { init: initApproachToc } = await import(
-                new URL('./utils/approach-toc-scroll.js', import.meta.url).href
+                    new URL('./utils/approach-toc-scroll.js', import.meta.url).href
                 );
 
-                // 同期/非同期どちらの init でも安全に実行する小ヘルパ
-                const runSafe = (fn) => {
-                try {
-                    const r = fn();
-                    if (r && typeof r.then === 'function') {
-                    r.catch(() => { /* swallow */ });
-                    }
-                } catch { /* swallow */ }
-                };
+                // [REV] コストの高い観測は ready シグナル後＆idle で
+                const runSafe = fn => { try { const r = fn(); if (r && typeof r.then === 'function') r.catch(() => { }); } catch { } };
 
-                // 即時初期化（骨格だけでも動く）
-                setTimeout(() => runSafe(() => initApproachToc()), 0);
-                // ローダ準備完了後にも初期化
+                rIC(() => runSafe(() => initApproachToc()));
                 document.addEventListener(
-                'sr:approach:ready',
-                () => runSafe(() => initApproachToc()),
-                { once: true, passive: true }
+                    'sr:approach:ready',
+                    () => rIC(() => runSafe(() => initApproachToc())),
+                    { once: true, passive: true }
                 );
             } catch (e) {
                 console.error('[dynamic import] approach-toc-scroll.js failed:', e);
             }
         }
+
+        // [REV] 必要になった時点でアクティブリンク監視を「重め設定」に切替できるフック
+        // document.addEventListener('sr:nav:activate-links', () => {
+        //   initAnchorOffsetScroll({ ...重め設定, activeLink: { enable: true, ... } });
+        // }, { passive: true, once: true });
+
     } finally {
         // no-op
     }
 });
 
 // bfcache 復帰時のスクロール初期化
+// [REV] passive + rAF
 window.addEventListener('pageshow', (ev) => {
-    if (ev.persisted) {
-        // 直リンク(#hash)復帰時はネイティブの到達を優先（内側も触らない）
-        if (!location.hash) {
-            requestAnimationFrame(atTopResetInnerScroll);
-        }
+    if (ev.persisted && !location.hash) {
+        requestAnimationFrame(atTopResetInnerScroll);
     }
-});
+}, { passive: true });
