@@ -12,7 +12,7 @@
  * @property {boolean} unloadFar         // 視界ウィンドウ外を破棄するか
  * @property {number} keepAhead          // 視界の先読み章数
  * @property {number} keepBehind         // 視界の後ろ保持章数
- * @property {boolean} hijackScrolling   // ★ スクロールをコードで動かすか（既定: false = ハイジャックしない）
+ * @property {boolean} hijackScrolling   // スクロールをコードで動かすか（既定: false = ハイジャックしない）
  */
 
 const _state = {
@@ -286,7 +286,7 @@ export function setupApproachLazyLoad(/** @type {ApproachLoaderOptions} */ opts 
     _state.unloadFar = opts.unloadFar ?? _state.unloadFar;
     _state.keepAhead = Number.isFinite(opts.keepAhead) ? Math.max(0, opts.keepAhead) : _state.keepAhead;
     _state.keepBehind = Number.isFinite(opts.keepBehind) ? Math.max(0, opts.keepBehind) : _state.keepBehind;
-    _state.hijackScrolling = !!opts.hijackScrolling; // ★ 既定 false
+    _state.hijackScrolling = !!opts.hijackScrolling; // 既定 false
 
     _state.io = new IntersectionObserver(onIntersect, {
         root: _state.root || null,

@@ -239,3 +239,17 @@ window.addEventListener('pageshow', (ev) => {
         requestAnimationFrame(atTopResetInnerScroll);
     }
 }, { passive: true });
+
+// ========= Lazy mount Sudoku demo on view =========
+{
+  const mount = document.getElementById('sr-demo');
+  if (mount) {
+    const io = new IntersectionObserver((entries, obs) => {
+      if (entries.some(e => e.isIntersecting)) {
+        import('./demos/embed.js').then(m => m.mountSudokuDemo(mount));
+        obs.disconnect();
+      }
+    }, { root: null, rootMargin: '200px', threshold: 0 });
+    io.observe(mount);
+  }
+}

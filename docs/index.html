@@ -112,6 +112,9 @@
     <link rel="stylesheet" href="./styles/scrollbar.css">
     <link rel="stylesheet" href="./styles/breakpoints.css">
 
+    <!-- ===== デモ専用（スコープ付きで競合回避） ===== -->
+    <link rel="stylesheet" href="./styles/demos/cell.css">
+
     <!-- ========= KaTeX + math.css 遅延読込 ========= -->
     <link rel="preload" href="./styles/vendor/katex.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="./styles/math.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -215,6 +218,15 @@
                 </div>
             </section>
 
+            <section class="section" id="demo">
+                <h2 class="section__title">
+                    デモ（簡易版ソルバー） <br>
+                    <span>Try It In Your Browser</span>
+                </h2>
+                
+                <div id="sr-demo" class="sr-demo-shell" data-sr-demo></div>
+            </section>
+
             <section class="features section" id="features">
                 <h2 class="section__title">
                     特長と利点 <br>
@@ -236,12 +248,12 @@
                                     <p class="features__description">メニュー構成は論理的に整理され、主要機能へは最短経路で到達可能です。マウスとキーボードの両方に配慮した操作体系により、学習コストを最小限に抑えます。</p>
                                 </div>
 
-                                <div class="features__image">
+                                <!-- <div class="features__image">
                                     <img src="assets/features/unknown.png" alt="image" class="features__img">
                                     <a href="#" target="_blank" class="features__button">
                                         <ion-icon name="chevron-down-outline"></ion-icon>
                                     </a>
-                                </div>
+                                </div> -->
                             </article>
 
                             <article class="features__card swiper-slide">
@@ -257,12 +269,12 @@
                                     <p class="features__description">明暗テーマに対応し、タイポグラフィや余白は可読性を最優先に設計。装飾は最小限に抑えつつ、学術的文書にも適合する落ち着いた外観を備えています。</p>
                                 </div>
 
-                                <div class="features__image">
+                                <!-- <div class="features__image">
                                     <img src="assets/features/unknown.png" alt="image" class="features__img">
                                     <a href="#" target="_blank" class="features__button">
                                         <ion-icon name="chevron-down-outline"></ion-icon>
                                     </a>
-                                </div>
+                                </div> -->
                             </article>
 
                             <article class="features__card swiper-slide">
@@ -278,12 +290,12 @@
                                     <p class="features__description">候補数字の自動更新、矛盾検出、段階的推論ログ、無制限のUndo/Redoなど、学習支援から検証作業まで幅広く対応します。</p>
                                 </div>
 
-                                <div class="features__image">
+                                <!-- <div class="features__image">
                                     <img src="assets/features/unknown.png" alt="image" class="features__img">
                                     <a href="#" target="_blank" class="features__button">
                                         <ion-icon name="chevron-down-outline"></ion-icon>
                                     </a>
-                                </div>
+                                </div> -->
                             </article>
 
                             <article class="features__card swiper-slide">
@@ -299,12 +311,12 @@
                                     <p class="features__description">ネイティブ実装により遅延を最小化し、大規模な探索処理でも安定動作を維持。レスポンスは常に滑らかで、長時間の利用にも耐える堅牢な設計です。</p>
                                 </div>
 
-                                <div class="features__image">
+                                <!-- <div class="features__image">
                                     <img src="assets/features/unknown.png" alt="image" class="features__img">
                                     <a href="#" target="_blank" class="features__button">
                                         <ion-icon name="chevron-down-outline"></ion-icon>
                                     </a>
-                                </div>
+                                </div> -->
                             </article>
                             
                             <article class="features__card swiper-slide">
@@ -320,12 +332,12 @@
                                     <p class="features__description">2025年第35週、<strong>374,424点</strong>の記録でリーダーボード<strong>1位</strong>を達成。2位との差は約<strong>240,000点</strong>に及び、処理速度と正確性の双方において卓越した性能を立証しました。</p>
                                 </div>
 
-                                <div class="features__image">
+                                <!-- <div class="features__image">
                                     <img src="assets/features/05.png" alt="image" class="features__img">
                                     <a href="#" target="_blank" class="features__button">
                                         <ion-icon name="chevron-down-outline"></ion-icon>
                                     </a>
-                                </div>
+                                </div> -->
                             </article>
                         </div>
 
@@ -596,6 +608,8 @@
         <script src="./js/animations/anime-js.js" defer></script>
         <script src="./js/animations/swiper-js.js" defer></script>
         <script src="./js/animations/scrollreveal-js.js" defer></script>
+
+        <script type="module" src="./js/demos/embed.js"></script>
     </div>
 </body>
 

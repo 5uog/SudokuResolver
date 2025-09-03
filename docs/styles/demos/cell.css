@@ -1,0 +1,239 @@
+/* ====== デモ全体スコープ ====== */
+[data-sr-demo] {
+    --grid-size: min(86vmin, 640px);
+    --radius: 18px;
+    --cell-line: #cfd3dc;
+    --block-line: #2b2f36;
+    --board-bg: #fff;
+    --board-text: #0e1116;
+    --page-bg: color-mix(in oklab, var(--body-color, #090a0f) 85%, #fff 6%);
+}
+
+@media (prefers-color-scheme: dark) {
+    [data-sr-demo] {
+        --cell-line: #9aa3b2;
+        --block-line: #e7ebf3;
+        --page-bg: color-mix(in oklab, var(--body-color, #090a0f) 90%, #fff 4%);
+    }
+
+    [data-sr-demo] .sr-cell input {
+        background: #0f1420;
+        border-color: #2a3140;
+        color: #151922;
+    }
+
+    [data-sr-demo] .sr-cell input.sr-fixed {
+        background: #1a2230;
+        color: #151922;
+    }
+
+    [data-sr-demo] .sr-cell input.sr-bad {
+        background: hsl(0 70% 18%);
+        border-color: hsl(0 70% 50%);
+        box-shadow: 0 0 0 2px hsl(0 70% 35%);
+        color: #151922;
+    }
+}
+
+[data-sr-demo] .sr-demo-shell {
+    min-height: 100svh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+}
+
+[data-sr-demo] .sr-demo-main {
+    /* padding-top: calc(var(--header-height, 3.5rem) + 1.25rem); */
+    padding-bottom: 2rem;
+    display: grid;
+    place-items: center;
+}
+
+[data-sr-demo] .sr-demo-wrap {
+    width: 100%;
+    max-width: 960px;
+    display: grid;
+    gap: 1.25rem;
+    justify-items: center;
+    justify-content: center;
+    padding-inline: 1rem;
+}
+
+[data-sr-demo] .sr-demo-header {
+    text-align: center;
+    max-width: 720px;
+}
+
+[data-sr-demo] .sr-demo-header h1 {
+    margin: 0 0 .25rem 0;
+    font-size: clamp(1.4rem, 1.1rem + 1.4vw, 2.2rem);
+}
+
+/* ====== 盤面 ====== */
+[data-sr-demo] .sr-board-frame {
+    width: var(--grid-size);
+    height: var(--grid-size);
+    border-radius: var(--radius);
+    background: var(--board-bg);
+    color: var(--board-text);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, .35);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+[data-sr-demo] .sr-board {
+    width: calc(var(--grid-size) - 12px);
+    height: calc(var(--grid-size) - 12px);
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(9, 1fr);
+    border: 2px solid var(--block-line);
+    border-radius: 12px;
+    background: var(--board-bg);
+}
+
+[data-sr-demo] .sr-cell {
+    position: relative;
+    display: grid;
+    place-items: center;
+    border-left: 1px solid var(--cell-line);
+    border-top: 1px solid var(--cell-line);
+}
+
+[data-sr-demo] .sr-cell:nth-child(-n+9) {
+    border-top: none;
+}
+
+[data-sr-demo] .sr-cell:nth-child(9n+1) {
+    border-left: none;
+}
+
+[data-sr-demo] .sr-cell:nth-child(3n) {
+    border-right: 2px solid var(--block-line);
+}
+
+[data-sr-demo] .sr-cell:nth-child(9n) {
+    border-right: none;
+}
+
+[data-sr-demo] .sr-cell:nth-child(n+19):nth-child(-n+27),
+[data-sr-demo] .sr-cell:nth-child(n+46):nth-child(-n+54) {
+    border-bottom: 2px solid var(--block-line);
+}
+
+[data-sr-demo] .sr-cell:nth-child(n+73):nth-child(-n+81) {
+    border-bottom: none;
+}
+
+[data-sr-demo] .sr-cell input {
+    width: 88%;
+    height: 88%;
+    text-align: center;
+    font: 700 clamp(1rem, .9rem + 1.3vmin, 2rem)/1.05 var(--body-font, system-ui);
+    color: var(--board-text);
+    background: #fff;
+    border: 1px solid #e7e9ef;
+    border-radius: 10px;
+    outline: none;
+    transition: transform .08s ease, box-shadow .18s ease, border-color .2s ease, background-color .2s ease;
+    caret-color: var(--first-color, hsl(0 60% 64%));
+}
+
+[data-sr-demo] .sr-cell input:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
+    background: #fff;
+    border-color: #d7dbe6;
+}
+
+[data-sr-demo] .sr-cell input:focus-visible {
+    border-color: var(--first-color, hsl(0 60% 64%));
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--first-color) 35%, transparent);
+}
+
+/* 重複・固定表示 */
+[data-sr-demo] .sr-cell input.sr-bad {
+    border-color: hsl(0 70% 60%);
+    background: hsl(0 80% 95%);
+    box-shadow: 0 0 0 2px hsl(0 70% 85%);
+}
+
+@media (prefers-color-scheme: dark) {
+    [data-sr-demo] .sr-cell input.sr-bad {
+        background: hsl(0 70% 18%);
+        border-color: hsl(0 70% 50%);
+        box-shadow: 0 0 0 2px hsl(0 70% 35%);
+        color: #151922;
+    }
+}
+
+[data-sr-demo] .sr-cell input.sr-fixed {
+    font-weight: 800;
+    background: #151922;
+}
+
+@media (prefers-color-scheme: dark) {
+    [data-sr-demo] .sr-cell input.sr-fixed {
+        background: #f7f9ff;
+    }
+}
+
+/* 操作パネル */
+[data-sr-demo] .sr-panel {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .75rem;
+    align-items: center;
+}
+
+[data-sr-demo] .sr-btn {
+    appearance: none;
+    border: 1px solid color-mix(in oklab, var(--container-color) 60%, #fff 14%);
+    background: color-mix(in oklab, var(--container-color) 92%, #fff 8%);
+    color: var(--title-color);
+    padding: .7rem 1rem;
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    cursor: pointer;
+    transition: transform .06s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease;
+}
+
+[data-sr-demo] .sr-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .2);
+    background: color-mix(in oklab, var(--container-color) 86%, #fff 12%);
+}
+
+[data-sr-demo] .sr-btn--primary {
+    border-color: color-mix(in oklab, var(--first-color) 55%, #fff 8%);
+    background: color-mix(in oklab, var(--first-color) 26%, var(--container-color) 78%);
+}
+
+[data-sr-demo] .sr-solution {
+    max-width: 960px;
+    width: 100%;
+    /* width: min(90vw, 960px); */
+    background: color-mix(in oklab, var(--container-color) 92%, #fff 6%);
+    border: 1px solid color-mix(in oklab, var(--container-color) 70%, #fff 14%);
+    padding: 1rem 1.25rem;
+    border-radius: 1rem;
+    overflow: auto;
+    color: var(--title-color);
+}
+
+[data-sr-demo] .sr-board-frame,
+[data-sr-demo] .sr-solution {
+    margin-inline: auto;
+}
+
+@media (max-width: 560px) {
+    [data-sr-demo] {
+        --grid-size: min(92vmin, 520px);
+    }
+
+    [data-sr-demo] .sr-btn {
+        padding: .6rem .9rem;
+    }
+}
