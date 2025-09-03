@@ -42,6 +42,22 @@ const _state = {
 // ===== SSR/非ブラウザ安全化 =====
 const hasDOM = typeof window !== "undefined" && typeof document !== "undefined";
 
+// ===== 印刷CSSの切替 =====
+const PRINT_LINK_ID = "print-css";
+
+function getPrintLink() {
+    if (!hasDOM) return null;
+    return document.getElementById(PRINT_LINK_ID);
+}
+function enablePrintCssNow() {
+    const link = getPrintLink();
+    if (link) link.media = "all";
+}
+function disablePrintCssNow() {
+    const link = getPrintLink();
+    if (link) link.media = "print";
+}
+
 // ---------- helpers ----------
 function clamp(n, lo, hi) {
     return Math.min(hi, Math.max(lo, n));
@@ -192,6 +208,8 @@ function applyLinkUrlSuppression() {
 // ---------- print lifecycle handlers ----------
 function beforePrint() {
     try {
+        enablePrintCssNow();
+
         applyPerMode();
         applyLinkUrlSuppression();
     } catch { /* swallow */ }
@@ -199,6 +217,8 @@ function beforePrint() {
 
 function afterPrint() {
     try {
+        disablePrintCssNow();
+
         // 必要なら片付けをここに
         // document.body.removeAttribute("data-print-urls");
     } catch { /* swallow */ }
@@ -235,6 +255,9 @@ export function init(options = {}) {
         applyPerMode();
         applyLinkUrlSuppression();
         document.body.setAttribute("data-wm", currentText());
+
+        // 印刷CSSは初期状態では print のまま（追加）
+        disablePrintCssNow();
 
         // イベント
         _listeners.before = beforePrint;

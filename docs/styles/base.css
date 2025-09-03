@@ -84,3 +84,28 @@ img {
 .main {
     overflow: hidden;
 }
+
+/*=============== PERFORMANCE OPTIMIZATION ===============*/
+/* 大きなセクションは、初期レイアウトをスキップして可視時にレンダリング */
+.section,
+.features__container,
+.faq__container,
+.approach__frame,
+.footer {
+    content-visibility: auto;
+    contain-intrinsic-size: 1000px 1px;
+}
+
+/* レイアウト境界を切る（再計算・再描画の波及を抑制） */
+.section,
+.features__card,
+.faq__item,
+.approach__frame {
+    contain: layout style paint;
+}
+
+/* スクロール・アニメ系の再計算を軽量化 */
+html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+}

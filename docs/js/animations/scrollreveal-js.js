@@ -91,6 +91,11 @@
             delay: 1500,
         });
 
+        sr.reveal('.section__title', {
+            origin: 'bottom',
+            delay: 700,
+        });
+
         // 軽い FOUC 対策（任意）
         markReady();
 

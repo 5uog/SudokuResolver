@@ -46,6 +46,7 @@
     outline: none;
 }
 
+/* 見出し */
 .approach__scroll :is(h1, h2, h3, h4, h5, h6) {
     font-family: var(--second-font);
     color: var(--title-color);
@@ -66,11 +67,11 @@
     font-size: clamp(1.15rem, 0.95rem + 0.5vw, 1.3rem);
 }
 
-.approach__scroll p,
-.approach__scroll li {
+.approach__scroll :is(p, li) {
     color: var(--text-color);
 }
 
+/* ==== TOC ==== */
 .approach__toc-inline {
     margin: 1.25rem 0 1.5rem;
     padding: .9rem 1rem;
@@ -99,13 +100,18 @@
     break-inside: avoid;
 }
 
-.approach__toc-list a {
+/* TOC 内リンクは常に同じ色（visited の影響を受けない） */
+.approach__toc-list a:any-link {
     display: block;
     padding: .28rem .35rem;
     border-radius: .4rem;
     color: var(--title-color);
     text-decoration: none;
     text-underline-offset: .18em;
+}
+
+.approach__toc-list a:visited {
+    color: var(--title-color);
 }
 
 .approach__toc-list a:hover {
@@ -117,11 +123,13 @@
     outline-offset: 1px;
 }
 
-.approach__toc-list a.is-active {
+.approach__toc-list a.is-active,
+.approach__toc-list a[aria-current="true"] {
     background: color-mix(in oklab, var(--first-color) 12%, #fff 0%);
     color: color-mix(in oklab, var(--first-color) 65%, var(--title-color) 40%);
 }
 
+/* ==== アンカー補正 ==== */
 .approach__scroll [id] {
     scroll-margin-top: var(--sr-anchor-offset);
 }
@@ -138,8 +146,8 @@
     }
 }
 
-.approach__scroll code,
-.approach__scroll kbd {
+/* コード等 */
+.approach__scroll :is(code, kbd) {
     background: color-mix(in oklab, var(--container-color) 80%, #fff 8%);
     border: 1px solid color-mix(in oklab, var(--container-color) 70%, #fff 12%);
     padding: .1em .35em;
@@ -155,20 +163,22 @@
     overflow: auto;
 }
 
-.approach__scroll a {
+/* ==== 本文リンク ==== */
+.approach__scroll .approach__section a {
     color: var(--first-color);
     text-underline-offset: .2em;
 }
 
-.approach__scroll a:visited {
+.approach__scroll .approach__section a:visited {
     color: color-mix(in oklab, var(--first-color) 78%, var(--title-color) 22%);
 }
 
-.approach__scroll a:hover {
+.approach__scroll .approach__section a:hover {
     text-decoration: underline;
     text-decoration-thickness: .06em;
 }
 
+/* 区切り線 */
 .approach__scroll hr {
     border: none;
     height: 1px;
@@ -176,6 +186,7 @@
     margin: 1.6rem 0;
 }
 
+/* アクション行 */
 .approach__actions {
     max-width: min(1120px, 92vw);
     margin: .75rem auto 0;
@@ -185,12 +196,21 @@
     justify-content: flex-end;
 }
 
+/* KaTeX 周り */
 .approach__scroll .katex-display {
     margin: 1.1rem 0;
 }
 
 .approach__scroll .katex {
     font-size: 1em;
+}
+
+.approach__scroll :is(h1, h2, h3, h4, h5, h6)[id] {
+    scroll-margin-top: var(--sr-anchor-offset);
+}
+
+.approach__scroll .para[id] {
+    scroll-margin-top: calc(var(--sr-anchor-offset) + 4px);
 }
 
 @media print {

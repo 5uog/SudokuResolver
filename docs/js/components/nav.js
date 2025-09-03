@@ -67,8 +67,8 @@ export function renderNavbar(active = '') {
 
             <nav class="nav container" aria-label="メインナビゲーション">
                 <a href="${home('top')}" class="nav__logo">
-                    <img src="./assets/logos/logo.png" alt="" class="nav__logo-img" />
-                    <span>数独Resolver</span>
+                <img src="${base}assets/logos/topbar-logo-64.webp" srcset="${base}assets/logos/topbar-logo-28.webp 28w, ${base}assets/logos/topbar-logo-64.webp 64w, ${base}assets/logos/topbar-logo-132.webp 132w" sizes="28px" alt="数独Resolver logo" width="28" height="28" class="nav__logo-img" />
+                <span>数独Resolver</span>
                 </a>
                 <div class="nav__menu">
                     <ul class="nav__list">
