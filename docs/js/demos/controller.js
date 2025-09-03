@@ -5,6 +5,7 @@ import { initBoard, readGrid, writeGrid, markFixed, setConflicts } from '../demo
 import { parse81 } from '../demos/model.js';
 import { findConflicts } from '../demos/validator.js';
 import { solveWithUniqueness } from '../demos/solver.js';
+import { attachCellBehaviors } from '../demos/cell.js';
 
 /**
  * 盤面生成とボタン配線を行う（UIロジックの中枢）
@@ -13,21 +14,13 @@ import { solveWithUniqueness } from '../demos/solver.js';
 export function wireSudokuDemo({ boardEl, solutionEl, btns }) {
     if (!boardEl || !solutionEl) return;
 
-    // 盤面を初期化
+    // 盤面を初期化（initBoard は 81 input を返す想定）
     const inputs = initBoard(boardEl);
-    markFixed(inputs);
+    markFixed(inputs); // 固定セルに .sr-fixed / readonly 等を付与する実装を推奨
 
-    // 小ユーティリティ
+    // utils
     const idxToRC = (i) => `r${Math.floor(i / 9) + 1}c${(i % 9) + 1}`;
-    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
     const debounce = (fn, ms = 60) => { let t = 0; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
-    const normalize = (v) => {
-        if (!v) return '';
-        const ch = v.trim()[0];
-        if (ch === '.' || ch === '0') return '';
-        if (/[1-9]/.test(ch)) return ch;
-        return '';
-    };
 
     const refreshConflicts = () => {
         const grid = readGrid(inputs);
@@ -37,44 +30,20 @@ export function wireSudokuDemo({ boardEl, solutionEl, btns }) {
     };
     const refreshDebounced = debounce(refreshConflicts, 60);
 
-    const moveFocus = (fromIndex, dRow, dCol) => {
-        const r = Math.floor(fromIndex / 9);
-        const c = fromIndex % 9;
-        const nr = clamp(r + dRow, 0, 8);
-        const nc = clamp(c + dCol, 0, 8);
-        const ni = nr * 9 + nc;
-        inputs[ni]?.focus();
-        inputs[ni]?.select?.();
-    };
-
-    // 入力ハンドリング
-    inputs.forEach((inp, i) => {
-        inp.addEventListener('input', () => {
-            const n = normalize(inp.value);
-            if (inp.value !== n) inp.value = n;
+    // === セル入力まわり（cell.js） ===
+    attachCellBehaviors(inputs, {
+        onChange: (_i, _v) => {
+            // 入力のたびに軽く検出（デバウンス）
             refreshDebounced();
-        });
-        inp.addEventListener('keydown', (ev) => {
-            const k = ev.key;
-            const editing = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Tab', 'Enter'];
-            if (!editing.includes(k) && !/[0-9.]/.test(k)) { ev.preventDefault(); return; }
-            if (k === 'Enter' || k === 'Tab') { ev.preventDefault(); moveFocus(i, 0, 1); return; }
-            if (k === 'Backspace') { if (!inp.value) { ev.preventDefault(); moveFocus(i, 0, -1); } return; }
-            if (k === 'ArrowLeft') { ev.preventDefault(); moveFocus(i, 0, -1); return; }
-            if (k === 'ArrowRight') { ev.preventDefault(); moveFocus(i, 0, 1); return; }
-            if (k === 'ArrowUp') { ev.preventDefault(); moveFocus(i, -1, 0); return; }
-            if (k === 'ArrowDown') { ev.preventDefault(); moveFocus(i, 1, 0); return; }
-            if (/[0-9.]/.test(k)) {
-                setTimeout(() => {
-                    inp.value = normalize(inp.value);
-                    moveFocus(i, 0, 1);
-                    refreshDebounced();
-                }, 0);
-            }
-        });
+        },
+        isBlocked: (i) => {
+            // 固定セル定義：readonly or class など、あなたの dom.js/markFixed に合わせる
+            const el = inputs[i];
+            return !!(el?.readOnly || el?.disabled || el?.classList.contains('sr-fixed'));
+        }
     });
 
-    // ボタン配線
+    // === ボタン配線 ===
     btns.check?.addEventListener('click', () => {
         const conflicts = refreshConflicts();
         solutionEl.textContent = conflicts.size === 0
@@ -121,9 +90,10 @@ export function wireSudokuDemo({ boardEl, solutionEl, btns }) {
     });
 
     btns.clear?.addEventListener('click', () => {
-        inputs.forEach(i => { i.value = ''; i.classList.remove('sr-fixed', 'sr-bad'); });
+        inputs.forEach(i => { i.value = ''; i.classList.remove('sr-fixed', 'sr-bad'); i.readOnly = false; i.disabled = false; });
         solutionEl.textContent = '';
         setConflicts(inputs, new Set());
+        inputs[0]?.focus();
     });
 
     btns.sample?.addEventListener('click', () => {
