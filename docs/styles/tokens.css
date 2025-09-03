@@ -13,8 +13,9 @@
     --body-color: hsl(240, 100%, 2%);
     --container-color: hsl(240, 8%, 6%);
 
-    --body-font: "Montserrat", "Noto Sans JP", system-ui, -apple-system, "Segoe UI", "Yu Gothic UI", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-    --second-font: "Unbounded", "Noto Sans JP", system-ui, -apple-system, sans-serif;
+    --body-font: "Montserrat","Noto Sans JP",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --second-font: "Unbounded","Noto Sans JP",system-ui,-apple-system,sans-serif;
+    --mono-font: ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
     --biggest-font-size: 2rem;
     --bigger-font-size: 1.75rem;
     --h1-font-size: 1.5rem;
